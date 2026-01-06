@@ -1,402 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FG Inventory Pro</title>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FG Search</title>
 
-    <style>
-        /* --- 1. THE 2024 "TRISTATE" THEME --- */
-        :root {
-            --bg-dark: #1e1e2d;           /* Deep Navy from image */
-            --glass-bg: #2a2a3c;         /* Card background */
-            --accent-purple: #8b5cf6;    /* Vibrant Purple */
-            --accent-orange: #f43f5e;    /* Vibrant Red/Orange */
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
-        body { 
-            font-family: 'Segoe UI', Roboto, -apple-system, sans-serif; 
-            background-color: var(--bg-dark); 
-            background-image: radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
-            color: var(--text-main); 
-            margin: 0; 
-            padding: 0; 
-            padding-bottom: 100px; 
-            -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
-        }
+<style>
+/* ===============================
+   REFERENCE-STYLE VISUAL SYSTEM
+================================ */
 
-        /* --- 2. GLASS SEARCH BAR --- */
-        .header-section {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            padding: 20px;
-            background: rgba(30, 30, 45, 0.85);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
+:root {
+  --bg1: #1b1f3b;
+  --bg2: #0f1224;
 
-        .search-wrapper {
-            position: relative;
-            max-width: 600px;
-            margin: 0 auto;
-        }
+  --glass: rgba(255,255,255,.08);
+  --glass-border: rgba(255,255,255,.15);
 
-        input { 
-            width: 100%; 
-            padding: 18px 20px 18px 50px; 
-            font-size: 16px; 
-            border-radius: 20px; 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-            background: #252538; 
-            color: white; 
-            outline: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            box-sizing: border-box; 
-            transition: all 0.3s var(--bounce);
-        }
+  --text-main: #f3f4ff;
+  --text-sub: #b4b7ff;
+  --text-muted: #8a8ecf;
 
-        input:focus { 
-            border-color: var(--accent-purple);
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
-            transform: translateY(-2px);
-        }
+  --accent-pink: #ff6bcb;
+  --accent-purple: #7c7cff;
+  --accent-orange: #ff9f68;
 
-        .search-icon {
-            position: absolute;
-            left: 18px;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0.5;
-            font-size: 20px;
-        }
+  --radius: 18px;
+}
 
-        /* --- 3. TRENDY CARDS --- */
-        #listContainer { 
-            padding: 10px 20px; 
-            max-width: 600px;
-            margin: 0 auto;
-        }
+/* BACKGROUND */
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, #2b2f6f, transparent 60%),
+    linear-gradient(160deg, var(--bg1), var(--bg2));
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: var(--text-main);
+  overflow-y: auto;
+}
 
-        .card { 
-            background: var(--glass-bg); 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            border-radius: 24px; 
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            cursor: pointer; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-            position: relative;
-            transition: all 0.3s var(--bounce);
-            animation: cardEntrance 0.5s ease-out backwards;
-        }
+/* APP CONTAINER */
+.app {
+  max-width: 520px;
+  margin: auto;
+  padding: 22px 18px 120px;
+}
 
-        @keyframes cardEntrance {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
+/* HEADER */
+.header {
+  margin-bottom: 20px;
+}
 
-        .card:active { transform: scale(0.97); background: #32324a; }
+.header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+}
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        /* Layout: Icon + Name */
-        .info { flex: 1; display: flex; align-items: center; gap: 15px; }
-        
-        .icon-orb {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, var(--accent-purple), #6366f1);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
-        }
+.header span {
+  color: var(--accent-orange);
+}
 
-        .name-stack { display: flex; flex-direction: column; gap: 4px; }
-        .item-name { font-size: 17px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px; }
-        .item-code { font-size: 12px; color: var(--text-muted); font-family: 'Courier New', monospace; font-weight: 600; }
-        
-        /* Quantity Ring Style */
-        .qty-badge { 
-            background: #1e1e2d;
-            border: 2px solid var(--accent-orange);
-            color: white; 
-            width: 55px;
-            height: 55px;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 15px rgba(244, 63, 94, 0.2);
-        }
-        .qty-val { font-size: 18px; font-weight: 800; }
-        .qty-lbl { font-size: 9px; opacity: 0.6; text-transform: uppercase; font-weight: bold; }
-        
-        /* Details Grid */
-        .expand-hint {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 12px;
-            color: var(--accent-purple);
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
+/* SEARCH */
+.search {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding-bottom: 14px;
+  background: linear-gradient(180deg, rgba(27,31,59,.95), rgba(27,31,59,.6), transparent);
+}
 
-        .details { 
-            display: none; 
-            margin-top: 20px; 
-            padding: 15px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 16px;
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px;
-            animation: slideDown 0.3s ease-out;
-        }
+.search input {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  backdrop-filter: blur(14px);
+  color: var(--text-main);
+  font-size: 15px;
+  outline: none;
+}
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.search input:focus {
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 4px rgba(124,124,255,.25);
+}
 
-        .spec-item {
-            display: flex;
-            flex-direction: column;
-        }
-        .spec-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
-        .spec-value { font-size: 14px; font-weight: 600; color: #fff; }
+/* CARD */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+  backdrop-filter: blur(18px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.35);
+  transition: transform .25s ease;
+}
 
-        /* --- 4. UTILS --- */
-        #status-bar { 
-            font-size: 11px; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            font-weight: 800;
-            color: var(--text-muted);
-            text-align: center;
-            margin-bottom: 10px;
-        }
+.card:hover {
+  transform: translateY(-4px);
+}
 
-        .empty-state { text-align: center; padding-top: 80px; color: var(--text-muted); }
+/* CARD HEADER */
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-        .fab-container { position: fixed; bottom: 30px; right: 25px; display: flex; flex-direction: column; gap: 15px; z-index: 200; }
-        .fab { 
-            background: var(--accent-purple); 
-            color: white; 
-            width: 56px; 
-            height: 56px; 
-            border-radius: 18px; 
-            border: none; 
-            font-size: 24px; 
-            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            transition: all 0.3s var(--bounce);
-        }
-        .fab:active { transform: scale(0.9); }
-        
-        #toast { 
-            visibility: hidden; 
-            min-width: 200px; 
-            background-color: var(--accent-purple); 
-            color: #fff; 
-            text-align: center; 
-            border-radius: 50px; 
-            padding: 16px; 
-            position: fixed; 
-            z-index: 2000; 
-            left: 50%; 
-            bottom: 40px; 
-            transform: translateX(-50%); 
-            font-weight: bold;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
-        }
-        #toast.show { visibility: visible; animation: popIn 0.4s var(--bounce); }
-        @keyframes popIn { from { bottom: 0; opacity: 0; } to { bottom: 40px; opacity: 1; } }
-    </style>
+.item-name {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.item-code {
+  font-size: 12px;
+  margin-top: 6px;
+  color: var(--text-muted);
+}
+
+/* SCORE BUBBLE */
+.bubble {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* DETAILS */
+.toggle {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+
+.details {
+  display: none;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(255,255,255,.25);
+  font-size: 13px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* EMPTY */
+.empty {
+  text-align: center;
+  margin-top: 100px;
+  color: var(--text-muted);
+}
+
+/* BOUNCE EFFECT */
+.bounce {
+  animation: bounce .4s ease;
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-14px); }
+  100% { transform: translateY(0); }
+}
+</style>
 </head>
+
 <body>
 
-    <div class="header-section">
-        <div id="status-bar">Syncing Warehouse...</div>
-        <div class="search-wrapper">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="Search item or code..." autocomplete="off">
+<div class="app" id="app">
+
+  <div class="header">
+    <h1>FG <span>Search</span></h1>
+  </div>
+
+  <div class="search">
+    <input id="searchInput" placeholder="Search item name or code">
+  </div>
+
+  <div id="list">
+    <div class="empty">Loading data…</div>
+  </div>
+
+</div>
+
+<script>
+const FILE = "inventory.xlsx";
+let DATA = [];
+
+async function loadExcel() {
+  const res = await fetch(FILE + "?t=" + Date.now());
+  const buf = await res.arrayBuffer();
+  const wb = XLSX.read(buf);
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  DATA = XLSX.utils.sheet_to_json(sheet);
+  document.getElementById("list").innerHTML =
+    `<div class="empty">Start typing to search</div>`;
+}
+
+function render(items) {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  if (!items.length) {
+    list.innerHTML = `<div class="empty">No results</div>`;
+    return;
+  }
+
+  items.forEach((r, i) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <div class="card-top">
+        <div>
+          <div class="item-name">${r["Item Name"] || "Unknown"}</div>
+          <div class="item-code">${r["Item Code"] || "-"}</div>
         </div>
-    </div>
+        <div class="bubble">${r["Quantity per Box"] || "-"}</div>
+      </div>
 
-    <div id="listContainer">
-        <div class="empty-state">
-            <p>Initializing Data Slate...</p>
-        </div>
-    </div>
+      <div class="toggle" onclick="toggle('d${i}')">
+        View details →
+      </div>
 
-    <div id="toast">Copied to Clipboard!</div>
+      <div class="details" id="d${i}">
+        <div>Weight: ${r["Weight"] || "-"}</div>
+        <div>Height: ${r["Height"] || "-"}</div>
+        <div>OFC: ${r["OFC"] || "-"}</div>
+        <div>Dia: ${r["Body Dia Major"] || "-"}</div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
 
-    <div class="fab-container">
-        <button class="fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">⬆</button>
-        <button class="fab" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})">⬇</button>
-    </div>
+function toggle(id) {
+  const d = document.getElementById(id);
+  d.style.display = d.style.display === "grid" ? "none" : "grid";
+}
 
-    <script>
-        const FILE_NAME = "inventory.xlsx"; 
-        let allData = [];
+document.getElementById("searchInput").addEventListener("input", e => {
+  const q = e.target.value.toUpperCase().trim();
+  if (!q) {
+    document.getElementById("list").innerHTML =
+      `<div class="empty">Start typing to search</div>`;
+    return;
+  }
+  const words = q.split(" ");
+  render(DATA.filter(r =>
+    words.every(w =>
+      ((r["Item Name"] || "") + (r["Item Code"] || ""))
+      .toUpperCase().includes(w)
+    )
+  ));
+});
 
-        function getIcon(name) {
-            const n = name.toUpperCase();
-            if (n.includes("CAP") || n.includes("SCREW") || n.includes("CLOSURE")) return "🔘"; 
-            if (n.includes("CUP") || n.includes("DOSE") || n.includes("MEASUR")) return "🥃"; 
-            if (n.includes("JAR")) return "🍯"; 
-            if (n.includes("BOTTLE") || n.includes("PET")) return "🧴"; 
-            if (n.includes("PUMP") || n.includes("SPRAY") || n.includes("MIST")) return "🔫";
-            return "📦"; 
-        }
+/* SCROLL BOUNCE */
+let lastScroll = 0;
+window.addEventListener("scroll", () => {
+  const max = document.body.scrollHeight - innerHeight;
+  if ((scrollY <= 0 && lastScroll > 0) || (scrollY >= max && lastScroll < max)) {
+    document.getElementById("app").classList.add("bounce");
+    setTimeout(() => document.getElementById("app").classList.remove("bounce"), 400);
+  }
+  lastScroll = scrollY;
+});
 
-        async function loadInventory() {
-            const status = document.getElementById('status-bar');
-            try {
-                const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
-                if (!response.ok) throw new Error(`404: File Missing`);
+loadExcel();
+</script>
 
-                const arrayBuffer = await response.arrayBuffer();
-                const workbook = XLSX.read(arrayBuffer);
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rawData = XLSX.utils.sheet_to_json(firstSheet);
-
-                allData = rawData.map(row => ({
-                    code: row["Item Code"] || "N/A",
-                    name: row["Item Name"] || "Unknown Item",
-                    qty: row["Quantity per Box"] || "0",
-                    weight: row["Weight"] || "-",
-                    height: row["Height"] || "-",
-                    ofc: row["OFC"] || "-",
-                    dia: row["Body Dia Major"] || "-"
-                }));
-
-                status.innerHTML = `ONLINE: ${allData.length} UNITS`;
-                status.style.color = "#4ade80";
-                
-                document.getElementById('listContainer').innerHTML = `
-                    <div class="empty-state">
-                        <p style="font-size:40px;">⌨️</p>
-                        <p>Awaiting Search Query</p>
-                    </div>`;
-
-            } catch (error) {
-                status.innerHTML = `SYSTEM ERROR`;
-                status.style.color = "#f43f5e";
-            }
-        }
-
-        function renderList(items) {
-            const container = document.getElementById('listContainer');
-            container.innerHTML = ""; 
-
-            if (items.length === 0) {
-                container.innerHTML = `<div class='empty-state'>No matches found in database.</div>`;
-                return;
-            }
-
-            items.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.style.animationDelay = (index * 0.05) + 's';
-                
-                const icon = getIcon(item.name);
-                
-                card.onclick = (e) => {
-                    if(e.target.className === 'expand-hint') return;
-                    copyCardData(item, icon);
-                };
-
-                card.innerHTML = `
-                    <div class="card-header">
-                        <div class="info">
-                            <div class="icon-orb">${icon}</div>
-                            <div class="name-stack">
-                                <span class="item-name">${item.name}</span>
-                                <span class="item-code">${item.code}</span>
-                            </div>
-                        </div>
-                        <div class="qty-badge">
-                            <span class="qty-val">${item.qty}</span>
-                            <span class="qty-lbl">Box</span>
-                        </div>
-                    </div>
-                    
-                    <div class="expand-hint" onclick="toggleDetails('details-${index}', event)">View Technical Specs</div>
-                    
-                    <div id="details-${index}" class="details">
-                        <div class="spec-item"><span class="spec-label">Weight</span><span class="spec-value">${item.weight}</span></div>
-                        <div class="spec-item"><span class="spec-label">Height</span><span class="spec-value">${item.height}</span></div>
-                        <div class="spec-item"><span class="spec-label">OFC</span><span class="spec-value">${item.ofc}</span></div>
-                        <div class="spec-item"><span class="spec-label">Diameter</span><span class="spec-value">${item.dia}</span></div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function copyCardData(item, icon) {
-            const text = `${icon} ${item.name}\nID: ${item.code}\nQty: ${item.qty}/box\n\nSpecs:\nW: ${item.weight} | H: ${item.height}\nOFC: ${item.ofc} | Dia: ${item.dia}`;
-            navigator.clipboard.writeText(text).then(() => showToast());
-        }
-
-        function showToast() {
-            var x = document.getElementById("toast");
-            x.className = "show";
-            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2500);
-        }
-
-        window.toggleDetails = function(id, e) {
-            e.stopPropagation();
-            const el = document.getElementById(id);
-            const isHidden = el.style.display === "none" || el.style.display === "";
-            el.style.display = isHidden ? "grid" : "none";
-            e.target.innerHTML = isHidden ? "Hide Specs" : "View Technical Specs";
-        }
-
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const queryRaw = e.target.value;
-            const container = document.getElementById('listContainer');
-
-            if (queryRaw.trim() === "") {
-                renderEmpty();
-                return; 
-            }
-
-            const query = queryRaw.toUpperCase().split(" ").filter(w => w);
-            const filtered = allData.filter(item => {
-                const fullText = (item.name + " " + item.code).toUpperCase();
-                return query.every(word => fullText.includes(word));
-            });
-            renderList(filtered);
-        });
-
-        function renderEmpty() {
-            document.getElementById('listContainer').innerHTML = `
-                <div class="empty-state">
-                    <p style="font-size:40px;">⌨️</p>
-                    <p>Awaiting Search Query</p>
-                </div>`;
-        }
-
-        loadInventory();
-    </script>
 </body>
 </html>
