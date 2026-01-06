@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FG Inventory: 2026 LIVE</title>
+    <title>FG Inventory: ULTIMATE</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
@@ -14,27 +14,29 @@
             --glass-border: rgba(255, 255, 255, 0.08);
             --text-main: #ffffff;
             --text-muted: #94a3b8;
+            --primary-accent: #c084fc; /* Bright Purple */
             --gradient-primary: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
             --radius-xl: 24px;
         }
 
-        /* --- 1. BOUNCY SCROLL & BACKGROUND --- */
-        html, body {
-            height: 100%;
-            overflow-x: hidden;
-            background-color: var(--bg-deep);
+        /* --- 1. BOUNCY SCROLL FIX --- */
+        html {
+            /* Do NOT lock height to 100%, this kills the bounce */
+            scroll-behavior: smooth;
         }
 
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             color: var(--text-main); 
             margin: 0; 
+            background-color: var(--bg-deep);
             
-            /* Native Bounce Physics */
-            -webkit-overflow-scrolling: touch; 
-            overflow-y: scroll;
+            /* FORCE BOUNCE PHYSICS */
+            min-height: 101vh; /* Ensures page is always scrollable */
+            overscroll-behavior-y: contain; /* Keeps the bounce within the app */
+            -webkit-overflow-scrolling: touch;
             
-            /* Ambient Glow */
+            /* Ambient Glow Background */
             background-image: 
                 radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
                 radial-gradient(circle at 90% 60%, rgba(236, 72, 153, 0.12) 0%, transparent 40%);
@@ -45,7 +47,7 @@
         .search-container { 
             position: sticky; 
             top: 0; 
-            padding: 20px 24px 10px 24px; /* Added padding bottom */
+            padding: 20px 24px 10px 24px; 
             z-index: 100; 
             background: rgba(15, 15, 19, 0.85);
             backdrop-filter: blur(20px);
@@ -86,9 +88,7 @@
             font-weight: 700;
             letter-spacing: 0.5px;
             text-transform: uppercase;
-            color: #10b981; /* Default success green */
-            
-            /* The Pulse Effect */
+            color: #10b981; 
             animation: pulse-green 2s infinite;
             display: flex; justify-content: center; align-items: center; gap: 8px;
         }
@@ -105,7 +105,7 @@
         #listContainer { 
             padding: 20px 24px;
             /* CRITICAL: Extra padding so scroll goes way past the buttons */
-            padding-bottom: 140px; 
+            padding-bottom: 160px; 
         }
 
         .card { 
@@ -159,12 +159,28 @@
             cursor: pointer; padding: 8px; font-size: 12px; font-weight: 600; 
             border-top: 1px solid rgba(255,255,255,0.05);
         }
+        
+        /* --- 4. RESTORED BOLD SPECS FONTS --- */
         .details { display: none; margin-top: 15px; grid-template-columns: 1fr 1fr; gap: 10px; }
         .spec-pill { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; text-align: center; }
-        .spec-val { color: white; font-weight: 600; font-size: 14px; }
-        .spec-lbl { color: var(--text-muted); font-size: 10px; text-transform: uppercase; margin-bottom: 2px;}
+        
+        /* Restored the look you liked: Uppercase, Colored, Bold */
+        .spec-lbl { 
+            color: var(--primary-accent); 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            font-weight: 800; 
+            display: block; 
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        .spec-val { 
+            color: white; 
+            font-weight: 700; 
+            font-size: 15px; 
+        }
 
-        /* --- 4. ANIMATED EMPTY STATE --- */
+        /* --- 5. ANIMATED EMPTY STATE --- */
         .empty-state { 
             text-align: center; 
             margin-top: 60px; 
@@ -173,7 +189,6 @@
         
         .empty-icon { font-size: 48px; margin-bottom: 10px; animation: float 3s ease-in-out infinite; }
         
-        /* The Moving Gradient Text */
         .live-text {
             font-size: 20px;
             font-weight: 800;
@@ -187,18 +202,18 @@
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* --- 5. FIXED FAB (Positioned Higher) --- */
+        /* --- 6. FIXED FAB (No Overlap) --- */
         .fab-container { 
             position: fixed; 
-            bottom: 30px; /* Moved up slightly */
+            bottom: 40px; /* Moved slightly higher */
             right: 24px; 
             display: flex; 
             flex-direction: column; 
-            gap: 12px; 
+            gap: 16px; 
             z-index: 200; 
         }
         .fab { 
-            background: #1e1e24; /* Dark solid background for contrast */
+            background: #1e1e24; 
             border: 1px solid rgba(255,255,255,0.2);
             color: white; width: 50px; height: 50px; 
             border-radius: 50%; font-size: 20px; cursor: pointer; 
@@ -238,7 +253,7 @@
 
     <div class="fab-container">
         <button class="fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">⬆</button>
-        <button class="fab" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})">⬇</button>
+        <button class="fab" onclick="window.scrollTo({top: 99999, behavior: 'smooth'})">⬇</button>
     </div>
 
     <script>
@@ -258,7 +273,7 @@
         async function loadInventory() {
             const status = document.getElementById('status-bar');
             status.innerHTML = "<span>●</span> Syncing...";
-            status.style.color = "#fbbf24"; // Yellow for loading
+            status.style.color = "#fbbf24"; 
 
             try {
                 const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
@@ -269,7 +284,6 @@
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const rawData = XLSX.utils.sheet_to_json(firstSheet);
 
-                // Success State: Green Pulse
                 status.innerHTML = `<span>●</span> ${rawData.length} ASSETS ACTIVE`;
                 status.style.color = "#10b981"; 
 
@@ -283,7 +297,6 @@
                     dia: row["Body Dia Major"] || "-"
                 }));
 
-                // ANIMATED EMPTY STATE
                 document.getElementById('listContainer').innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">✨</div>
