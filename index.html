@@ -3,351 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYBER_INVENTORY</title>
+    <title>INVENTORY_SYS</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-
     <style>
-        /* --- CYBERPUNK THEME VARIABLES --- */
-        :root {
-            --neon-green: #00ff41;
-            --neon-dim: rgba(0, 255, 65, 0.2);
-            --bg-black: #050505;
-            --bg-panel: #0a0a0a;
-            --border-color: #333;
-            --scanline: rgba(0, 0, 0, 0.5);
-        }
-
-        /* --- CRT SCANLINE EFFECT --- */
-        body::before {
-            content: " ";
-            display: block;
-            position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 999;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
-
-        body { 
-            font-family: "Courier New", Courier, monospace; 
-            background-color: var(--bg-black); 
-            color: var(--neon-green); 
-            margin: 0; 
-            padding: 0; 
-            padding-bottom: 100px;
-            text-transform: uppercase;
-        }
-
-        /* --- TERMINAL SEARCH HEADER --- */
-        .search-container { 
-            position: sticky; 
-            top: 0; 
-            background: var(--bg-black);
-            padding: 16px; 
-            z-index: 100; 
-            border-bottom: 2px solid var(--neon-green);
-            box-shadow: 0 0 15px var(--neon-dim);
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .prompt-char {
-            font-size: 20px;
-            font-weight: bold;
-            margin-right: 10px;
-            animation: blink 1s infinite;
-        }
-
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            font-size: 16px; 
-            border: 1px solid var(--neon-green); 
-            background: #000; 
-            color: var(--neon-green); 
-            font-family: "Courier New", monospace;
-            outline: none;
-            box-shadow: inset 0 0 10px var(--neon-dim);
-        }
-        input::placeholder { color: rgba(0, 255, 65, 0.4); }
-
-        /* --- DATA SLATE CARDS --- */
-        #listContainer { padding: 16px; }
-
-        .card { 
-            background: var(--bg-panel); 
-            border: 1px solid var(--border-color);
-            border-left: 4px solid var(--neon-green);
-            margin-bottom: 16px; 
-            padding: 16px; 
-            position: relative;
-            cursor: pointer;
-            /* Cut Corner Effect */
-            clip-path: polygon(0 0, 100% 0, 100% 85%, 92% 100%, 0 100%);
-            transition: all 0.2s;
-        }
-
-        .card:hover, .card:active {
-            box-shadow: 0 0 15px var(--neon-dim);
-            border-color: var(--neon-green);
-        }
-
-        .card-header {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .item-icon { font-size: 24px; filter: grayscale(100%) brightness(200%) sepia(100%) hue-rotate(50deg) saturate(500%); } 
-
-        .info-col { display: flex; flex-direction: column; gap: 4px; }
-
-        .item-name { 
-            font-size: 14px; 
-            font-weight: bold; 
-            letter-spacing: 1px;
-            color: #fff;
-        }
-
-        .item-code { 
-            font-size: 12px; 
-            color: var(--neon-green); 
-            background: rgba(0, 255, 65, 0.1);
-            padding: 2px 6px;
-            width: fit-content;
-        }
-
-        .qty-box {
-            text-align: right;
-            border: 1px solid var(--border-color);
-            padding: 4px 8px;
-            background: #000;
-        }
-        .qty-val { font-size: 18px; font-weight: bold; color: #fff; }
-        .qty-lbl { font-size: 9px; color: var(--neon-green); }
-
-        /* --- TECH SPECS GRID --- */
-        .expand-btn {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: var(--neon-green);
-            font-family: "Courier New", monospace;
-            font-size: 12px;
-            text-align: left;
-            margin-top: 12px;
-            cursor: pointer;
-            border-top: 1px dashed #333;
-            padding-top: 8px;
-        }
-
-        .details-grid {
-            display: none;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 8px;
-            border: 1px solid #222;
-            padding: 8px;
-            background: #000;
-        }
-        .detail-row { font-size: 11px; color: #888; }
-        .detail-row span { color: var(--neon-green); }
-
-        /* --- UI ELEMENTS --- */
-        .status-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: #000;
-            border-top: 1px solid var(--neon-green);
-            padding: 8px;
-            font-size: 10px;
-            text-align: center;
-            z-index: 100;
-        }
-
-        .fab-container { position: fixed; bottom: 40px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 200; }
-        .fab { 
-            background: #000; 
-            border: 1px solid var(--neon-green); 
-            color: var(--neon-green); 
-            width: 40px; height: 40px; 
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 0 10px var(--neon-dim);
-            cursor: pointer;
-        }
-
-        #toast {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: #000;
-            border: 2px solid var(--neon-green);
-            color: var(--neon-green);
-            padding: 20px;
-            font-weight: bold;
-            display: none;
-            z-index: 2000;
-            box-shadow: 0 0 50px var(--neon-dim);
-            text-align: center;
-        }
+        body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; margin: 0; background: #f0f0f0; color: #000; padding-bottom: 100px; }
         
-        .empty-state { text-align: center; margin-top: 50px; opacity: 0.5; }
+        /* HEADER */
+        .header { position: sticky; top: 0; background: #fff; border-bottom: 2px solid #000; padding: 16px; z-index: 100; }
+        .search-wrapper { display: flex; align-items: center; border: 2px solid #000; background: #fff; height: 50px; }
+        .search-icon { padding: 0 16px; font-size: 20px; }
+        input { border: none; font-size: 18px; font-weight: bold; width: 100%; outline: none; text-transform: uppercase; letter-spacing: 1px; }
 
-        @keyframes blink { 50% { opacity: 0; } }
+        /* LIST */
+        .list-container { padding: 0; }
+        .card { background: #fff; border-bottom: 1px solid #000; padding: 20px; display: grid; grid-template-columns: 1fr auto; gap: 10px; cursor: pointer; }
+        .card:active { background: #000; color: #fff; }
+        
+        .name-group { display: flex; flex-direction: column; gap: 5px; }
+        .item-name { font-size: 20px; font-weight: 800; line-height: 1.1; }
+        .item-code { font-size: 12px; font-family: monospace; opacity: 0.6; }
+
+        .qty-group { text-align: right; min-width: 80px; }
+        .qty { font-size: 32px; font-weight: 900; color: #ff3b30; letter-spacing: -1px; }
+        .card:active .qty { color: #fff; }
+        .unit { font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* SPECS GRID */
+        .specs { display: none; grid-column: 1 / -1; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px dotted #000; }
+        .card:active .specs { border-color: #555; }
+        .spec-item { display: flex; flex-direction: column; }
+        .spec-label { font-size: 9px; text-transform: uppercase; opacity: 0.5; }
+        .spec-val { font-size: 14px; font-weight: bold; font-family: monospace; }
+        
+        /* UTILS */
+        .empty { padding: 40px; text-align: center; font-weight: bold; opacity: 0.4; text-transform: uppercase; letter-spacing: 2px; }
+        .fab { position: fixed; bottom: 30px; right: 20px; width: 50px; height: 50px; background: #000; color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
-
-    <div class="search-container">
-        <div class="input-wrapper">
-            <span class="prompt-char">></span>
-            <input type="text" id="searchInput" placeholder="INIT_SEARCH_SEQUENCE..." autocomplete="off">
+    <div class="header">
+        <div class="search-wrapper">
+            <span class="search-icon">→</span>
+            <input type="text" id="searchInput" placeholder="SEARCH ASSETS...">
         </div>
     </div>
-
-    <div id="listContainer">
-        <div class="empty-state">SYSTEM_READY // AWAITING_INPUT</div>
-    </div>
-
-    <div id="toast">DATA_COPIED_TO_CLIPBOARD</div>
-
-    <div class="fab-container">
-        <div class="fab" onclick="window.scrollTo(0,0)">▲</div>
-        <div class="fab" onclick="window.scrollTo(0, document.body.scrollHeight)">▼</div>
-    </div>
-
-    <div class="status-bar" id="sysStatus">SYSTEM_ONLINE // V 5.0</div>
+    <div id="list" class="list-container"><div class="empty">SYSTEM READY</div></div>
+    <div class="fab" onclick="window.scrollTo(0,0)">↑</div>
 
     <script>
-        const FILE_NAME = "inventory.xlsx"; 
+        const FILE_NAME = "inventory.xlsx";
         let allData = [];
 
-        function getIcon(name) {
-            const n = name ? name.toUpperCase() : "";
-            if (n.includes("CAP") || n.includes("SCREW")) return "⚙️"; 
-            if (n.includes("CUP") || n.includes("DOSE")) return "🥃"; 
-            if (n.includes("JAR")) return "🍯"; 
-            if (n.includes("BOTTLE") || n.includes("PET")) return "🧴"; 
-            if (n.includes("PUMP")) return "🔫";
-            return "📦"; 
-        }
-
-        async function loadInventory() {
-            const status = document.getElementById('sysStatus');
-            status.innerText = "ESTABLISHING_LINK...";
-
+        async function init() {
             try {
-                const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
-                if (!response.ok) throw new Error("CONNECTION_REFUSED");
-
-                const buffer = await response.arrayBuffer();
-                const workbook = XLSX.read(buffer);
-                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-
-                const getVal = (r, k) => {
-                    const found = Object.keys(r).find(key => key.toUpperCase().includes(k.toUpperCase()));
-                    return found ? r[found] : null;
-                };
-
-                allData = json.map(r => ({
-                    code: getVal(r, "Code") || "N/A",
-                    name: getVal(r, "Name") || "UNKNOWN_ASSET",
-                    qty: getVal(r, "Qty") || getVal(r, "Quantity") || "0",
-                    weight: getVal(r, "Weight") || "-",
-                    height: getVal(r, "Height") || "-",
-                    ofc: getVal(r, "OFC") || "-",
-                    dia: getVal(r, "Dia") || "-"
-                }));
-
-                status.innerText = `LINK_ESTABLISHED // ${allData.length}_RECORDS`;
-                document.getElementById('listContainer').innerHTML = `<div class="empty-state">ENTER_QUERY ></div>`;
-
-            } catch (error) {
-                status.innerText = "CRITICAL_FAILURE";
-                alert("ERR: " + error.message);
-            }
-        }
-
-        function renderList(items) {
-            const container = document.getElementById('listContainer');
-            container.innerHTML = ""; 
-
-            if (items.length === 0) {
-                container.innerHTML = `<div class='empty-state'>NO_MATCH_FOUND</div>`;
-                return;
-            }
-
-            items.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                const icon = getIcon(item.name);
+                const res = await fetch(FILE_NAME + "?t=" + Date.now());
+                const wb = XLSX.read(await res.arrayBuffer());
+                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+                const find = (r, k) => r[Object.keys(r).find(x => x.toUpperCase().includes(k.toUpperCase()))];
                 
-                card.onclick = (e) => {
-                    if(e.target.className === 'expand-btn') return;
-                    copyData(item, icon);
+                allData = json.map(r => ({
+                    c: find(r,"Code")||"-", n: find(r,"Name")||"UNKNOWN", q: find(r,"Qty")||find(r,"Quantity")||"0",
+                    w: find(r,"Weight")||"-", h: find(r,"Height")||"-", o: find(r,"OFC")||"-", d: find(r,"Dia")||"-"
+                }));
+            } catch(e) { alert(e.message); }
+        }
+
+        function render(items) {
+            const list = document.getElementById('list');
+            list.innerHTML = items.length ? "" : "<div class='empty'>NO RESULTS</div>";
+            items.forEach((i, idx) => {
+                const el = document.createElement('div');
+                el.className = 'card';
+                el.onclick = () => {
+                    const specs = document.getElementById(`s-${idx}`);
+                    specs.style.display = specs.style.display === 'grid' ? 'none' : 'grid';
+                    navigator.clipboard.writeText(`${i.n} ${i.q}`); 
                 };
-
-                card.innerHTML = `
-                    <div class="card-header">
-                        <div class="item-icon">${icon}</div>
-                        <div class="info-col">
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-code">ID: ${item.code}</div>
-                        </div>
-                        <div class="qty-box">
-                            <div class="qty-val">${item.qty}</div>
-                            <div class="qty-lbl">UNIT</div>
-                        </div>
-                    </div>
-                    <button class="expand-btn" onclick="toggleDetails('d-${index}', this)">[+] VIEW_SPECS</button>
-                    <div id="d-${index}" class="details-grid">
-                        <div class="detail-row">WGT: <span>${item.weight}</span></div>
-                        <div class="detail-row">HGT: <span>${item.height}</span></div>
-                        <div class="detail-row">OFC: <span>${item.ofc}</span></div>
-                        <div class="detail-row">DIA: <span>${item.dia}</span></div>
-                    </div>
-                `;
-                container.appendChild(card);
+                el.innerHTML = `
+                    <div class="name-group"><div class="item-name">${i.n}</div><div class="item-code">${i.c}</div></div>
+                    <div class="qty-group"><div class="qty">${i.q}</div><div class="unit">BOX</div></div>
+                    <div id="s-${idx}" class="specs">
+                        <div class="spec-item"><span class="spec-label">WGT</span><span class="spec-val">${i.w}</span></div>
+                        <div class="spec-item"><span class="spec-label">HGT</span><span class="spec-val">${i.h}</span></div>
+                        <div class="spec-item"><span class="spec-label">OFC</span><span class="spec-val">${i.o}</span></div>
+                        <div class="spec-item"><span class="spec-label">DIA</span><span class="spec-val">${i.d}</span></div>
+                    </div>`;
+                list.appendChild(el);
             });
         }
 
-        function copyData(item, icon) {
-            const txt = `// ASSET_DATA //\n${item.name}\nID: ${item.code}\nQTY: ${item.qty}\n\n// SPECS //\nW: ${item.weight} | H: ${item.height}\nOFC: ${item.ofc}`;
-            navigator.clipboard.writeText(txt);
-            const t = document.getElementById('toast');
-            t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 1500);
-        }
-
-        window.toggleDetails = function(id, btn) {
-            const el = document.getElementById(id);
-            const isHidden = getComputedStyle(el).display === "none";
-            el.style.display = isHidden ? "grid" : "none";
-            btn.innerText = isHidden ? "[-] HIDE_SPECS" : "[+] VIEW_SPECS";
-        }
-
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            const val = e.target.value.toUpperCase().trim();
-            if(!val) {
-                 document.getElementById('listContainer').innerHTML = `<div class="empty-state">ENTER_QUERY ></div>`;
-                 return;
-            }
-            const terms = val.split(" ").filter(w => w);
-            const filtered = allData.filter(item => {
-                const str = (item.name + " " + item.code).toUpperCase();
-                return terms.every(t => str.includes(t));
-            });
-            renderList(filtered);
+        document.getElementById('searchInput').addEventListener('input', e => {
+            const v = e.target.value.toUpperCase().split(" ").filter(Boolean);
+            render(v.length ? allData.filter(i => v.every(w => (i.n+i.c).toUpperCase().includes(w))) : []);
         });
-
-        loadInventory();
+        init();
     </script>
 </body>
 </html>
