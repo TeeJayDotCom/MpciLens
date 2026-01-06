@@ -3,425 +3,348 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Inventory OS</title>
+    <title>CYBER_INVENTORY</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <style>
-        /* --- VARIABLES --- */
+        /* --- CYBERPUNK THEME VARIABLES --- */
         :root {
-            --glass-surface: rgba(20, 20, 20, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-highlight: rgba(255, 255, 255, 0.05);
-            --primary: #3b82f6;
-            --text-main: #ffffff;
-            --text-muted: #888888;
-            --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --neon-green: #00ff41;
+            --neon-dim: rgba(0, 255, 65, 0.2);
+            --bg-black: #050505;
+            --bg-panel: #0a0a0a;
+            --border-color: #333;
+            --scanline: rgba(0, 0, 0, 0.5);
         }
 
-        /* --- BASE --- */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
-            background-color: #000000;
-            color: white;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* --- ANIMATED BACKGROUND AURORA --- */
-        .ambient-light {
+        /* --- CRT SCANLINE EFFECT --- */
+        body::before {
+            content: " ";
+            display: block;
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: -1;
-            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #000000 100%);
-            overflow: hidden;
-        }
-        .blob {
-            position: absolute;
-            filter: blur(80px);
-            opacity: 0.4;
-            animation: float 10s infinite ease-in-out;
-        }
-        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #2563eb; animation-delay: 0s; }
-        .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #7c3aed; animation-delay: -5s; }
-        
-        @keyframes float {
-            0% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(30px, 50px) rotate(10deg); }
-            100% { transform: translate(0, 0) rotate(0deg); }
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 999;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
         }
 
-        /* --- HEADER (BENTO GLASS) --- */
-        .header-container {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 12px 16px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
+        body { 
+            font-family: "Courier New", Courier, monospace; 
+            background-color: var(--bg-black); 
+            color: var(--neon-green); 
+            margin: 0; 
+            padding: 0; 
+            padding-bottom: 100px;
+            text-transform: uppercase;
         }
 
-        .search-bar {
+        /* --- TERMINAL SEARCH HEADER --- */
+        .search-container { 
+            position: sticky; 
+            top: 0; 
+            background: var(--bg-black);
+            padding: 16px; 
+            z-index: 100; 
+            border-bottom: 2px solid var(--neon-green);
+            box-shadow: 0 0 15px var(--neon-dim);
+        }
+
+        .input-wrapper {
             position: relative;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 18px;
-            border: 1px solid var(--glass-border);
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            overflow: hidden;
         }
 
-        .search-bar:focus-within {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        .prompt-char {
+            font-size: 20px;
+            font-weight: bold;
+            margin-right: 10px;
+            animation: blink 1s infinite;
         }
 
-        .search-icon {
-            padding-left: 16px;
-            font-size: 18px;
-            opacity: 0.5;
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            font-size: 16px; 
+            border: 1px solid var(--neon-green); 
+            background: #000; 
+            color: var(--neon-green); 
+            font-family: "Courier New", monospace;
+            outline: none;
+            box-shadow: inset 0 0 10px var(--neon-dim);
+        }
+        input::placeholder { color: rgba(0, 255, 65, 0.4); }
+
+        /* --- DATA SLATE CARDS --- */
+        #listContainer { padding: 16px; }
+
+        .card { 
+            background: var(--bg-panel); 
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--neon-green);
+            margin-bottom: 16px; 
+            padding: 16px; 
+            position: relative;
+            cursor: pointer;
+            /* Cut Corner Effect */
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 92% 100%, 0 100%);
+            transition: all 0.2s;
         }
 
-        input {
+        .card:hover, .card:active {
+            box-shadow: 0 0 15px var(--neon-dim);
+            border-color: var(--neon-green);
+        }
+
+        .card-header {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .item-icon { font-size: 24px; filter: grayscale(100%) brightness(200%) sepia(100%) hue-rotate(50deg) saturate(500%); } 
+
+        .info-col { display: flex; flex-direction: column; gap: 4px; }
+
+        .item-name { 
+            font-size: 14px; 
+            font-weight: bold; 
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        .item-code { 
+            font-size: 12px; 
+            color: var(--neon-green); 
+            background: rgba(0, 255, 65, 0.1);
+            padding: 2px 6px;
+            width: fit-content;
+        }
+
+        .qty-box {
+            text-align: right;
+            border: 1px solid var(--border-color);
+            padding: 4px 8px;
+            background: #000;
+        }
+        .qty-val { font-size: 18px; font-weight: bold; color: #fff; }
+        .qty-lbl { font-size: 9px; color: var(--neon-green); }
+
+        /* --- TECH SPECS GRID --- */
+        .expand-btn {
             width: 100%;
-            padding: 16px 16px 16px 12px;
-            font-size: 17px;
             background: transparent;
             border: none;
-            color: white;
-            outline: none;
-            font-weight: 500;
-        }
-        
-        /* The Status Dot */
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #22c55e;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #22c55e;
-            margin-right: 16px;
-            transition: background 0.3s;
-        }
-
-        /* --- CARDS --- */
-        #listContainer { padding: 16px; padding-bottom: 100px; }
-
-        .card {
-            background: var(--glass-surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 14px;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s var(--ease-elastic), background 0.2s;
-            /* The "Inner Glow" trick */
-            box-shadow: inset 0 1px 0 0 var(--glass-highlight); 
-        }
-
-        .card:active {
-            transform: scale(0.96);
-            background: rgba(40, 40, 40, 0.8);
-        }
-
-        .card-top {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-        }
-
-        /* Icon Container */
-        .icon-box {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            border: 1px solid var(--glass-border);
-            flex-shrink: 0;
-        }
-
-        .info-box { flex: 1; }
-
-        .item-name {
-            font-size: 17px;
-            font-weight: 600;
-            line-height: 1.3;
-            margin-bottom: 6px;
-            letter-spacing: -0.01em;
-        }
-
-        .code-pill {
-            display: inline-block;
+            color: var(--neon-green);
+            font-family: "Courier New", monospace;
             font-size: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #ccc;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-family: monospace;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        /* Qty floating right */
-        .qty-area {
-            text-align: right;
-            min-width: 60px;
-        }
-        .qty-val {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--primary);
-            text-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
-        }
-        .qty-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        /* Specs Drawer */
-        .specs-trigger {
-            margin-top: 14px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            justify-content: center;
-        }
-        .trigger-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .specs-grid {
-            display: none;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
+            text-align: left;
             margin-top: 12px;
+            cursor: pointer;
+            border-top: 1px dashed #333;
+            padding-top: 8px;
         }
-        .spec-item {
-            background: rgba(0,0,0,0.3);
-            padding: 8px 12px;
-            border-radius: 10px;
-        }
-        .spec-lbl { font-size: 11px; color: #666; display: block; margin-bottom: 2px; }
-        .spec-val { font-size: 14px; color: #ddd; font-weight: 500; }
 
-        /* --- SKELETON LOADING (The Fancy Loading) --- */
-        .skeleton {
-            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 8px;
+        .details-grid {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+            border: 1px solid #222;
+            padding: 8px;
+            background: #000;
         }
-        .sk-card { height: 100px; margin-bottom: 12px; border-radius: 20px; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .detail-row { font-size: 11px; color: #888; }
+        .detail-row span { color: var(--neon-green); }
 
-        /* --- TOAST --- */
+        /* --- UI ELEMENTS --- */
+        .status-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #000;
+            border-top: 1px solid var(--neon-green);
+            padding: 8px;
+            font-size: 10px;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .fab-container { position: fixed; bottom: 40px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 200; }
+        .fab { 
+            background: #000; 
+            border: 1px solid var(--neon-green); 
+            color: var(--neon-green); 
+            width: 40px; height: 40px; 
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 0 10px var(--neon-dim);
+            cursor: pointer;
+        }
+
         #toast {
             position: fixed;
-            bottom: 30px; left: 50%; transform: translateX(-50%) scale(0.9);
-            background: rgba(255, 255, 255, 0.9);
-            color: black;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-weight: 600;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            z-index: 1000;
-            display: flex; align-items: center; gap: 10px;
-        }
-        #toast.active { transform: translateX(-50%) scale(1); opacity: 1; }
-
-        /* --- EMPTY STATE --- */
-        .empty-view {
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: #000;
+            border: 2px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 20px;
+            font-weight: bold;
+            display: none;
+            z-index: 2000;
+            box-shadow: 0 0 50px var(--neon-dim);
             text-align: center;
-            margin-top: 80px;
-            color: var(--text-muted);
         }
-        .empty-icon { font-size: 64px; opacity: 0.2; margin-bottom: 16px; display: block; }
+        
+        .empty-state { text-align: center; margin-top: 50px; opacity: 0.5; }
 
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <div class="ambient-light">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-    </div>
-
-    <div class="header-container">
-        <div class="search-bar">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="Search inventory..." autocomplete="off">
-            <div id="statusDot" class="status-dot" style="background:orange"></div>
+    <div class="search-container">
+        <div class="input-wrapper">
+            <span class="prompt-char">></span>
+            <input type="text" id="searchInput" placeholder="INIT_SEARCH_SEQUENCE..." autocomplete="off">
         </div>
     </div>
 
     <div id="listContainer">
-        <div class="skeleton sk-card"></div>
-        <div class="skeleton sk-card"></div>
-        <div class="skeleton sk-card"></div>
-        <div class="skeleton sk-card"></div>
+        <div class="empty-state">SYSTEM_READY // AWAITING_INPUT</div>
     </div>
 
-    <div id="toast">
-        <span>📋</span> Specs copied!
+    <div id="toast">DATA_COPIED_TO_CLIPBOARD</div>
+
+    <div class="fab-container">
+        <div class="fab" onclick="window.scrollTo(0,0)">▲</div>
+        <div class="fab" onclick="window.scrollTo(0, document.body.scrollHeight)">▼</div>
     </div>
+
+    <div class="status-bar" id="sysStatus">SYSTEM_ONLINE // V 5.0</div>
 
     <script>
         const FILE_NAME = "inventory.xlsx"; 
         let allData = [];
 
-        // --- ICONS ---
         function getIcon(name) {
             const n = name ? name.toUpperCase() : "";
-            if (n.includes("CAP") || n.includes("SCREW")) return "🔘"; 
+            if (n.includes("CAP") || n.includes("SCREW")) return "⚙️"; 
             if (n.includes("CUP") || n.includes("DOSE")) return "🥃"; 
-            if (n.includes("JAR") || n.includes("HONEY")) return "🍯"; 
+            if (n.includes("JAR")) return "🍯"; 
             if (n.includes("BOTTLE") || n.includes("PET")) return "🧴"; 
-            if (n.includes("PUMP") || n.includes("SPRAY")) return "🔫";
+            if (n.includes("PUMP")) return "🔫";
             return "📦"; 
         }
 
-        // --- LOAD ---
         async function loadInventory() {
+            const status = document.getElementById('sysStatus');
+            status.innerText = "ESTABLISHING_LINK...";
+
             try {
                 const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
-                if (!response.ok) throw new Error("File missing");
-                
+                if (!response.ok) throw new Error("CONNECTION_REFUSED");
+
                 const buffer = await response.arrayBuffer();
                 const workbook = XLSX.read(buffer);
                 const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                
-                // Fuzzy Match
-                const getVal = (r,k) => r[Object.keys(r).find(key=>key.toUpperCase().includes(k.toUpperCase()))];
+
+                const getVal = (r, k) => {
+                    const found = Object.keys(r).find(key => key.toUpperCase().includes(k.toUpperCase()));
+                    return found ? r[found] : null;
+                };
 
                 allData = json.map(r => ({
-                    code: getVal(r,"Code")||"N/A",
-                    name: getVal(r,"Name")||"Unknown",
-                    qty: getVal(r,"Qty")||getVal(r,"Quantity")||"0",
-                    weight: getVal(r,"Weight")||"-",
-                    height: getVal(r,"Height")||"-",
-                    ofc: getVal(r,"OFC")||"-",
-                    dia: getVal(r,"Dia")||"-"
+                    code: getVal(r, "Code") || "N/A",
+                    name: getVal(r, "Name") || "UNKNOWN_ASSET",
+                    qty: getVal(r, "Qty") || getVal(r, "Quantity") || "0",
+                    weight: getVal(r, "Weight") || "-",
+                    height: getVal(r, "Height") || "-",
+                    ofc: getVal(r, "OFC") || "-",
+                    dia: getVal(r, "Dia") || "-"
                 }));
 
-                // Update Status to Green
-                document.getElementById('statusDot').style.background = "#22c55e";
-                document.getElementById('statusDot').style.boxShadow = "0 0 10px #22c55e";
-                
-                renderEmpty();
+                status.innerText = `LINK_ESTABLISHED // ${allData.length}_RECORDS`;
+                document.getElementById('listContainer').innerHTML = `<div class="empty-state">ENTER_QUERY ></div>`;
 
-            } catch (err) {
-                document.getElementById('statusDot').style.background = "#ef4444";
-                alert("Error: " + err.message);
+            } catch (error) {
+                status.innerText = "CRITICAL_FAILURE";
+                alert("ERR: " + error.message);
             }
-        }
-
-        // --- RENDER ---
-        function renderEmpty() {
-            document.getElementById('listContainer').innerHTML = `
-                <div class="empty-view">
-                    <span class="empty-icon">⌨️</span>
-                    <p>Ready to search</p>
-                </div>`;
         }
 
         function renderList(items) {
             const container = document.getElementById('listContainer');
-            container.innerHTML = "";
+            container.innerHTML = ""; 
 
             if (items.length === 0) {
-                container.innerHTML = `
-                <div class="empty-view">
-                    <span class="empty-icon">🔭</span>
-                    <p>No matches found</p>
-                </div>`;
+                container.innerHTML = `<div class='empty-state'>NO_MATCH_FOUND</div>`;
                 return;
             }
 
-            items.forEach((item, idx) => {
+            items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
                 const icon = getIcon(item.name);
-                const el = document.createElement('div');
-                el.className = 'card';
-                el.onclick = (e) => {
-                    if(!e.target.closest('.trigger-btn')) copyData(item, icon);
-                };
                 
-                el.innerHTML = `
-                    <div class="card-top">
-                        <div class="icon-box">${icon}</div>
-                        <div class="info-box">
+                card.onclick = (e) => {
+                    if(e.target.className === 'expand-btn') return;
+                    copyData(item, icon);
+                };
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="item-icon">${icon}</div>
+                        <div class="info-col">
                             <div class="item-name">${item.name}</div>
-                            <div class="code-pill">${item.code}</div>
+                            <div class="item-code">ID: ${item.code}</div>
                         </div>
-                        <div class="qty-area">
+                        <div class="qty-box">
                             <div class="qty-val">${item.qty}</div>
-                            <div class="qty-label">Box</div>
+                            <div class="qty-lbl">UNIT</div>
                         </div>
                     </div>
-                    <div class="specs-trigger">
-                        <button class="trigger-btn" onclick="toggleSpecs('s-${idx}', this)">
-                            <span>View Specs</span> ⌄
-                        </button>
-                    </div>
-                    <div id="s-${idx}" class="specs-grid">
-                        <div class="spec-item"><span class="spec-lbl">Weight</span><span class="spec-val">${item.weight}</span></div>
-                        <div class="spec-item"><span class="spec-lbl">Height</span><span class="spec-val">${item.height}</span></div>
-                        <div class="spec-item"><span class="spec-lbl">OFC</span><span class="spec-val">${item.ofc}</span></div>
-                        <div class="spec-item"><span class="spec-lbl">Diameter</span><span class="spec-val">${item.dia}</span></div>
+                    <button class="expand-btn" onclick="toggleDetails('d-${index}', this)">[+] VIEW_SPECS</button>
+                    <div id="d-${index}" class="details-grid">
+                        <div class="detail-row">WGT: <span>${item.weight}</span></div>
+                        <div class="detail-row">HGT: <span>${item.height}</span></div>
+                        <div class="detail-row">OFC: <span>${item.ofc}</span></div>
+                        <div class="detail-row">DIA: <span>${item.dia}</span></div>
                     </div>
                 `;
-                container.appendChild(el);
+                container.appendChild(card);
             });
         }
 
-        // --- ACTIONS ---
         function copyData(item, icon) {
-            const txt = `${icon} ${item.name}\nCode: ${item.code}\nQty: ${item.qty}\n\nSpecs:\nW: ${item.weight} | H: ${item.height}\nOFC: ${item.ofc} | D: ${item.dia}`;
+            const txt = `// ASSET_DATA //\n${item.name}\nID: ${item.code}\nQTY: ${item.qty}\n\n// SPECS //\nW: ${item.weight} | H: ${item.height}\nOFC: ${item.ofc}`;
             navigator.clipboard.writeText(txt);
-            
             const t = document.getElementById('toast');
-            t.classList.add('active');
-            setTimeout(() => t.classList.remove('active'), 2000);
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 1500);
         }
 
-        window.toggleSpecs = function(id, btn) {
+        window.toggleDetails = function(id, btn) {
             const el = document.getElementById(id);
             const isHidden = getComputedStyle(el).display === "none";
             el.style.display = isHidden ? "grid" : "none";
-            btn.innerHTML = isHidden ? "Hide Specs ⌃" : "View Specs ⌄";
+            btn.innerText = isHidden ? "[-] HIDE_SPECS" : "[+] VIEW_SPECS";
         }
 
-        // --- SEARCH ---
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            const val = e.target.value.trim().toUpperCase();
-            if (!val) { renderEmpty(); return; }
-            
-            const terms = val.split(" ").filter(Boolean);
-            const res = allData.filter(i => {
-                const str = (i.name + " " + i.code).toUpperCase();
+            const val = e.target.value.toUpperCase().trim();
+            if(!val) {
+                 document.getElementById('listContainer').innerHTML = `<div class="empty-state">ENTER_QUERY ></div>`;
+                 return;
+            }
+            const terms = val.split(" ").filter(w => w);
+            const filtered = allData.filter(item => {
+                const str = (item.name + " " + item.code).toUpperCase();
                 return terms.every(t => str.includes(t));
             });
-            renderList(res);
+            renderList(filtered);
         });
 
         loadInventory();
