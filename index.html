@@ -7,24 +7,98 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <style>
-        body { font-family: sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 16px; padding-bottom: 80px; }
-        .search-container { position: sticky; top: 0; background: #121212; padding: 10px 0; z-index: 100; }
-        input { width: 100%; padding: 16px; font-size: 18px; border-radius: 12px; border: 1px solid #333; background: #1e1e1e; color: white; outline: none; box-sizing: border-box; }
-        .card { background: #1e1e1e; padding: 16px; margin-bottom: 12px; border-radius: 12px; border-left: 5px solid #2196F3; cursor: pointer; }
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .item-name { font-size: 17px; font-weight: 700; color: #ffffff; margin-bottom: 4px; }
-        .item-code { font-size: 14px; color: #aaaaaa; background: #2c2c2c; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
-        .qty-box { background: #2196F3; color: white; padding: 8px 10px; border-radius: 8px; text-align: center; min-width: 50px; }
+        /* --- 1. APP STYLING (Dark Mode) --- */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; 
+            background-color: #121212; 
+            color: #e0e0e0; 
+            margin: 0; 
+            padding: 16px; 
+            padding-bottom: 80px; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- 2. SEARCH BAR --- */
+        .search-container { 
+            position: sticky; 
+            top: 0; 
+            background: #121212; 
+            padding: 10px 0; 
+            z-index: 100; 
+        }
+        input { 
+            width: 100%; 
+            padding: 16px; 
+            font-size: 18px; 
+            border-radius: 12px; 
+            border: 1px solid #333; 
+            background: #1e1e1e; 
+            color: white; 
+            outline: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-sizing: border-box; 
+        }
+        input:focus { border-color: #2196F3; }
+
+        /* --- 3. PRODUCT CARDS --- */
+        .card { 
+            background: #1e1e1e; 
+            padding: 16px; 
+            margin-bottom: 12px; 
+            border-radius: 12px; 
+            border-left: 5px solid #2196F3; 
+            cursor: pointer; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .card:active { background-color: #252525; }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        /* Layout: Icon + Name */
+        .info { flex: 1; padding-right: 10px; }
+        .name-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+        .item-icon { font-size: 28px; } /* Large Icon */
+        .item-name { font-size: 17px; font-weight: 700; color: #ffffff; line-height: 1.3; }
+        
+        .item-code { 
+            font-size: 14px; 
+            color: #aaaaaa; 
+            background: #2c2c2c; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-family: monospace; 
+            margin-left: 44px; /* Aligned with text */
+            display: inline-block; 
+        }
+        
+        /* Quantity Box */
+        .qty-box { 
+            background: #2196F3; 
+            color: white; 
+            padding: 8px 10px; 
+            border-radius: 8px; 
+            text-align: center; 
+            min-width: 50px; 
+        }
         .qty-val { font-size: 18px; font-weight: bold; display: block; }
         .qty-lbl { font-size: 10px; text-transform: uppercase; }
-        .expand-btn { width: 100%; background: transparent; border: none; color: #2196F3; margin-top: 8px; cursor: pointer; text-align: left; padding: 0; }
-        .details { display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid #333; font-size: 13px; color: #ccc; grid-template-columns: 1fr 1fr; gap: 8px; }
         
+        /* Expand Button & Details */
+        .expand-btn { width: 100%; background: transparent; border: none; color: #2196F3; margin-top: 8px; cursor: pointer; text-align: left; padding: 0; margin-left: 44px; }
+        .details { display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid #333; font-size: 13px; color: #ccc; grid-template-columns: 1fr 1fr; gap: 8px; margin-left: 44px; }
+        
+        /* --- 4. UTILS (Status, Toast, Buttons) --- */
         #status-bar { padding: 10px; background: #333; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #ccc; display: block; text-align: center; border: 1px solid #555; }
-        
         .empty-state { text-align: center; color: #666; margin-top: 60px; font-size: 16px; }
+        
         .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 200; }
         .fab { background: #2196F3; color: white; width: 48px; height: 48px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+        
         #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #2196F3; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
@@ -40,7 +114,7 @@
     </div>
 
     <div id="listContainer">
-        <div class="empty-state">Loading data...</div>
+        <div class="empty-state">Loading inventory...</div>
     </div>
 
     <div id="toast">📋 Copied!</div>
@@ -54,16 +128,39 @@
         const FILE_NAME = "inventory.xlsx"; 
         let allData = [];
 
+        // --- 1. SMART ICON SELECTOR (UPDATED) ---
+        function getIcon(name) {
+            const n = name.toUpperCase();
+            
+            // CAPS (Plastic Closures) -> Radio Button (Looks like a round cap)
+            if (n.includes("CAP") || n.includes("SCREW") || n.includes("CLOSURE")) return "🔘"; 
+            
+            // CUPS (Dose/Measuring) -> Tumbler Glass (Looks like a small dose cup)
+            if (n.includes("CUP") || n.includes("DOSE") || n.includes("MEASUR")) return "🥃"; 
+            
+            // JARS (PET) -> Honey Pot (Best representation of a wide mouth container)
+            if (n.includes("JAR")) return "🍯"; 
+            
+            // BOTTLES (PET) -> Lotion Bottle (Standard Plastic Bottle)
+            if (n.includes("BOTTLE") || n.includes("PET")) return "🧴"; 
+            
+            // PUMPS/SPRAYS -> Water Pistol (Spray)
+            if (n.includes("PUMP") || n.includes("SPRAY") || n.includes("MIST")) return "🔫";
+
+            // Default -> Box
+            return "📦"; 
+        }
+
         async function loadInventory() {
             const status = document.getElementById('status-bar');
-            status.innerHTML = "Attempting to load " + FILE_NAME + "...";
+            status.innerHTML = "Loading " + FILE_NAME + "...";
 
             try {
-                // Fetch the file with a timestamp to prevent browser caching
+                // Fetch file with timestamp to prevent caching
                 const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
                 
                 if (!response.ok) {
-                    throw new Error(`Could not find ${FILE_NAME}. (Status: ${response.status})`);
+                    throw new Error(`Could not find ${FILE_NAME}.`);
                 }
 
                 const arrayBuffer = await response.arrayBuffer();
@@ -71,9 +168,9 @@
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const rawData = XLSX.utils.sheet_to_json(firstSheet);
 
-                status.innerHTML = "File found. Reading " + rawData.length + " rows...";
+                status.innerHTML = "Processing " + rawData.length + " rows...";
 
-                // EXACT COLUMN MAPPING (Based on your file)
+                // Map Columns
                 allData = rawData.map(row => ({
                     code: row["Item Code"] || "N/A",
                     name: row["Item Name"] || "Unknown Item",
@@ -87,7 +184,7 @@
                 status.innerHTML = `✅ Ready. Loaded ${allData.length} items.`;
                 status.style.color = "#4caf50";
                 
-                // Clear loading message
+                // Set Clean Start Screen
                 document.getElementById('listContainer').innerHTML = `
                     <div class="empty-state">
                         <span style="font-size:40px;">⌨️</span><br>Start typing to search...
@@ -97,7 +194,7 @@
                 console.error(error);
                 status.innerHTML = `❌ Error: ${error.message}`;
                 status.style.color = "#ff5252";
-                alert("Debug Error: " + error.message + "\n\nMake sure the file is named 'inventory.xlsx' (all lowercase) and uploaded to GitHub.");
+                alert("Error: " + error.message + "\n\nMake sure your file on GitHub is named 'inventory.xlsx' (all lowercase).");
             }
         }
 
@@ -113,19 +210,32 @@
             items.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'card';
+                
+                // Get the Icon based on name
+                const icon = getIcon(item.name);
+                
+                // Click to Copy Logic
                 card.onclick = (e) => {
                     if(e.target.className === 'expand-btn') return;
-                    copyCardData(item);
+                    copyCardData(item, icon);
                 };
+
                 card.innerHTML = `
                     <div class="card-header">
                         <div class="info">
-                            <div class="item-name">${item.name}</div>
+                            <div class="name-row">
+                                <span class="item-icon">${icon}</span>
+                                <div class="item-name">${item.name}</div>
+                            </div>
                             <div class="item-code">${item.code}</div>
                         </div>
-                        <div class="qty-box"><span class="qty-val">${item.qty}</span><span class="qty-lbl">Box</span></div>
+                        <div class="qty-box">
+                            <span class="qty-val">${item.qty}</span>
+                            <span class="qty-lbl">Box</span>
+                        </div>
                     </div>
-                    <button class="expand-btn" onclick="toggleDetails('details-${index}')">▼ Specs</button>
+                    
+                    <button class="expand-btn" onclick="toggleDetails('details-${index}')">▼ View Tech Specs</button>
                     <div id="details-${index}" class="details" style="display:none">
                         <div>Weight: ${item.weight}</div><div>Height: ${item.height}</div>
                         <div>OFC: ${item.ofc}</div><div>Dia: ${item.dia}</div>
@@ -135,8 +245,8 @@
             });
         }
 
-        function copyCardData(item) {
-            const text = `📦 ${item.name}\n🆔 Code: ${item.code}\n📦 Box Qty: ${item.qty}\n\n📊 Tech Specs:\n• Weight: ${item.weight}\n• Height: ${item.height}\n• OFC: ${item.ofc}\n• Dia: ${item.dia}`;
+        function copyCardData(item, icon) {
+            const text = `${icon} ${item.name}\n🆔 Code: ${item.code}\n📦 Box Qty: ${item.qty}\n\n📊 Tech Specs:\n• Weight: ${item.weight}\n• Height: ${item.height}\n• OFC: ${item.ofc}\n• Dia: ${item.dia}`;
             navigator.clipboard.writeText(text).then(() => showToast());
         }
 
@@ -151,6 +261,7 @@
             el.style.display = (el.style.display === "none") ? "grid" : "none";
         }
 
+        // Search Logic
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const queryRaw = e.target.value;
             const container = document.getElementById('listContainer');
@@ -161,7 +272,6 @@
             }
 
             const query = queryRaw.toUpperCase().split(" ").filter(w => w);
-            // Safety check: ensure item.name exists before searching
             const filtered = allData.filter(item => {
                 const n = item.name ? item.name.toString() : "";
                 const c = item.code ? item.code.toString() : "";
