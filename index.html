@@ -3,66 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FG Inventory: 2026 Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>FG Inventory: 2024 LIVE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <style>
-        /* --- VARIABLES FROM YOUR IMAGE --- */
         :root {
-            --bg-deep: #13131F;     /* Deep Navy Background */
-            --glass-surface: rgba(255, 255, 255, 0.03);
+            --bg-deep: #0f0f13;
+            --glass-surface: rgba(255, 255, 255, 0.04);
             --glass-border: rgba(255, 255, 255, 0.08);
             --text-main: #ffffff;
             --text-muted: #94a3b8;
-            
-            /* The "TriState" Gradients */
-            --gradient-primary: linear-gradient(135deg, #7C3AED 0%, #DB2777 100%); /* Purple to Pink */
-            --gradient-glow: linear-gradient(135deg, rgba(124, 58, 237, 0.4), rgba(219, 39, 119, 0.4));
-            
+            --gradient-primary: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
             --radius-xl: 24px;
-            --radius-md: 16px;
         }
 
-        /* --- 1. BASE STYLING & BOUNCY SCROLL --- */
+        /* --- 1. BOUNCY SCROLL & BACKGROUND --- */
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            background-color: var(--bg-deep);
+        }
+
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: var(--bg-deep); 
             color: var(--text-main); 
             margin: 0; 
-            padding: 0; 
-            padding-bottom: 100px;
-            /* BOUNCY OVERSCROLL LOGIC */
-            overscroll-behavior-y: contain; 
-            -webkit-overflow-scrolling: touch;
             
-            /* Ambient Background Glow (Like the clouds in your image) */
+            /* Native Bounce Physics */
+            -webkit-overflow-scrolling: touch; 
+            overflow-y: scroll;
+            
+            /* Ambient Glow */
             background-image: 
-                radial-gradient(circle at 0% 0%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 100% 50%, rgba(219, 39, 119, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 60%, rgba(236, 72, 153, 0.12) 0%, transparent 40%);
             background-attachment: fixed;
-            min-height: 100vh;
         }
 
-        /* --- 2. FLOATING GLASS SEARCH HEADER --- */
+        /* --- 2. HEADER & ANIMATED STATUS --- */
         .search-container { 
             position: sticky; 
             top: 0; 
-            padding: 20px 24px; 
+            padding: 20px 24px 10px 24px; /* Added padding bottom */
             z-index: 100; 
-            /* Glass Effect */
-            background: rgba(19, 19, 31, 0.7);
+            background: rgba(15, 15, 19, 0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--glass-border);
         }
 
-        .input-wrapper {
-            position: relative;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        
-        /* The Search Bar Design */
         input { 
             width: 100%; 
             padding: 16px 20px 16px 50px; 
@@ -75,102 +65,83 @@
             outline: none;
             box-sizing: border-box; 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-
         input:focus { 
-            border-color: #DB2777; /* Pink Focus */
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 4px rgba(219, 39, 119, 0.15);
+            border-color: #EC4899; 
+            background: rgba(255, 255, 255, 0.08); 
+            box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.2); 
         }
 
-        /* Search Icon */
         .search-icon-overlay {
             position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
             font-size: 18px; opacity: 0.5; pointer-events: none;
         }
 
-        /* Status Text (Small & Techy) */
+        /* LIVE STATUS ANIMATION */
         #status-bar { 
-            font-size: 11px; 
-            color: var(--text-muted); 
+            font-size: 12px; 
             text-align: center; 
             margin-top: 12px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.5px;
             text-transform: uppercase;
+            color: #10b981; /* Default success green */
+            
+            /* The Pulse Effect */
+            animation: pulse-green 2s infinite;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
         }
 
-        /* --- 3. THE TRENDY CARDS --- */
-        #listContainer { padding: 20px 24px; }
+        @keyframes pulse-green {
+            0% { opacity: 0.7; text-shadow: 0 0 0 rgba(16, 185, 129, 0); }
+            50% { opacity: 1; text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+            100% { opacity: 0.7; text-shadow: 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .input-wrapper { position: relative; }
+
+        /* --- 3. CARDS & LIST PADDING --- */
+        #listContainer { 
+            padding: 20px 24px;
+            /* CRITICAL: Extra padding so scroll goes way past the buttons */
+            padding-bottom: 140px; 
+        }
 
         .card { 
-            /* Glassmorphism Card Style */
             background: var(--glass-surface);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
             border-radius: var(--radius-xl);
             padding: 20px; 
             margin-bottom: 16px; 
             cursor: pointer;
             position: relative;
-            overflow: hidden;
-            
-            /* Smooth Interaction */
-            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.2s;
+            transition: transform 0.2s, background 0.2s;
         }
+        .card:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.08); }
 
-        /* Subtle Hover/Active State */
-        .card:active { 
-            transform: scale(0.98); 
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        /* Gradient Icon Circle (Matching the "3.8" circle in your image) */
+        .card-header { display: flex; align-items: center; gap: 16px; }
+        
         .icon-circle {
             width: 56px; height: 56px;
             border-radius: 50%;
             background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
             border: 1px solid rgba(255,255,255,0.1);
             display: flex; align-items: center; justify-content: center;
-            font-size: 26px;
-            flex-shrink: 0;
+            font-size: 26px; flex-shrink: 0;
             position: relative;
         }
-        /* A subtle glow behind the icon */
         .icon-circle::after {
             content: ''; position: absolute; inset: 0; border-radius: 50%;
-            background: var(--gradient-primary); opacity: 0.1;
+            background: var(--gradient-primary); opacity: 0.15;
         }
 
         .info { flex: 1; }
+        .item-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+        .item-code { font-size: 12px; color: #d1d5db; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; display: inline-block; font-family: monospace; }
 
-        .item-name { 
-            font-size: 17px; 
-            font-weight: 700; 
-            color: var(--text-main); 
-            margin-bottom: 4px;
-            line-height: 1.3;
-        }
-
-        .item-code { 
-            font-size: 12px; 
-            color: #d1d5db; 
-            background: rgba(255,255,255,0.1); 
-            padding: 4px 10px; 
-            border-radius: 20px; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            display: inline-block;
-        }
-
-        /* Vibrant Quantity Badge */
         .qty-box { 
             background: var(--gradient-primary); 
             color: white; 
@@ -178,79 +149,73 @@
             border-radius: 18px; 
             text-align: center; 
             min-width: 55px;
-            box-shadow: 0 4px 15px rgba(219, 39, 119, 0.3);
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
         }
         .qty-val { font-size: 18px; font-weight: 800; display: block; }
         .qty-lbl { font-size: 10px; text-transform: uppercase; font-weight: 700; opacity: 0.9; }
 
-        /* --- 4. EXPANDABLE DETAILS --- */
         .expand-btn { 
-            width: 100%; 
-            background: transparent; 
-            border: none; 
-            color: #d8b4fe; /* Light Purple text */
-            margin-top: 15px; 
-            cursor: pointer; 
-            text-align: center; 
-            padding: 8px; 
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            width: 100%; background: transparent; border: none; color: #c4b5fd; margin-top: 15px; 
+            cursor: pointer; padding: 8px; font-size: 12px; font-weight: 600; 
             border-top: 1px solid rgba(255,255,255,0.05);
-            transition: color 0.2s;
+        }
+        .details { display: none; margin-top: 15px; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .spec-pill { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; text-align: center; }
+        .spec-val { color: white; font-weight: 600; font-size: 14px; }
+        .spec-lbl { color: var(--text-muted); font-size: 10px; text-transform: uppercase; margin-bottom: 2px;}
+
+        /* --- 4. ANIMATED EMPTY STATE --- */
+        .empty-state { 
+            text-align: center; 
+            margin-top: 60px; 
+            display: flex; flex-direction: column; align-items: center;
         }
         
-        .details { 
-            display: none; 
-            margin-top: 15px; 
-            padding-top: 5px; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
+        .empty-icon { font-size: 48px; margin-bottom: 10px; animation: float 3s ease-in-out infinite; }
+        
+        /* The Moving Gradient Text */
+        .live-text {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(270deg, #8B5CF6, #EC4899, #8B5CF6);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 3s ease infinite;
         }
 
-        .spec-pill {
-            background: rgba(0,0,0,0.2);
-            padding: 10px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .spec-val { color: white; font-weight: 600; font-size: 14px; }
-        .spec-lbl { color: var(--text-muted); font-size: 10px; text-transform: uppercase; display: block; margin-bottom: 2px;}
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* --- 5. FAB & TOAST (Floating Elements) --- */
-        .fab-container { position: fixed; bottom: 30px; right: 24px; display: flex; flex-direction: column; gap: 12px; z-index: 200; }
+        /* --- 5. FIXED FAB (Positioned Higher) --- */
+        .fab-container { 
+            position: fixed; 
+            bottom: 30px; /* Moved up slightly */
+            right: 24px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            z-index: 200; 
+        }
         .fab { 
-            background: var(--gradient-primary); 
+            background: #1e1e24; /* Dark solid background for contrast */
+            border: 1px solid rgba(255,255,255,0.2);
             color: white; width: 50px; height: 50px; 
-            border-radius: 50%; border: none; font-size: 20px; 
-            cursor: pointer; 
-            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4); 
+            border-radius: 50%; font-size: 20px; cursor: pointer; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
             display: flex; align-items: center; justify-content: center; 
             transition: transform 0.2s;
         }
-        .fab:active { transform: scale(0.9); }
+        .fab:active { transform: scale(0.9); border-color: #EC4899; }
         
         #toast { 
-            visibility: hidden; 
-            min-width: 200px; 
-            background: rgba(255,255,255,0.9); 
-            color: #000; 
-            text-align: center; 
-            border-radius: 50px; 
-            padding: 14px 24px; 
-            position: fixed; 
-            z-index: 1000; 
-            left: 50%; 
-            bottom: 40px; 
-            transform: translateX(-50%) translateY(20px); 
-            font-size: 14px; font-weight: 700;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            visibility: hidden; min-width: 200px; background: rgba(255,255,255,0.95); color: #000; 
+            text-align: center; border-radius: 50px; padding: 14px 24px; position: fixed; 
+            z-index: 1000; left: 50%; bottom: 40px; transform: translateX(-50%) translateY(20px); 
+            font-size: 14px; font-weight: 700; box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+            opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
-        
-        .empty-state { text-align: center; color: var(--text-muted); margin-top: 80px; font-size: 16px; font-weight: 500; }
 
     </style>
 </head>
@@ -261,12 +226,13 @@
             <span class="search-icon-overlay">🔍</span>
             <input type="text" id="searchInput" placeholder="Search Inventory..." autocomplete="off">
         </div>
-        <div id="status-bar">Connecting to Database...</div>
+        <div id="status-bar">
+            <span>●</span> Connecting...
+        </div>
     </div>
 
     <div id="listContainer">
-        <div class="empty-state">Loading assets...</div>
-    </div>
+        </div>
 
     <div id="toast">✅ Copied to clipboard!</div>
 
@@ -276,7 +242,6 @@
     </div>
 
     <script>
-        // --- PRESERVED LOGIC START (No changes to functionality) ---
         const FILE_NAME = "inventory.xlsx"; 
         let allData = [];
 
@@ -292,19 +257,21 @@
 
         async function loadInventory() {
             const status = document.getElementById('status-bar');
-            status.innerHTML = "Syncing...";
+            status.innerHTML = "<span>●</span> Syncing...";
+            status.style.color = "#fbbf24"; // Yellow for loading
 
             try {
                 const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
-                if (!response.ok) throw new Error(`Could not find ${FILE_NAME}.`);
+                if (!response.ok) throw new Error("File not found");
 
                 const arrayBuffer = await response.arrayBuffer();
                 const workbook = XLSX.read(arrayBuffer);
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const rawData = XLSX.utils.sheet_to_json(firstSheet);
 
-                status.innerHTML = `${rawData.length} ASSETS ACTIVE`;
-                status.style.color = "#a78bfa"; // Light purple for success text
+                // Success State: Green Pulse
+                status.innerHTML = `<span>●</span> ${rawData.length} ASSETS ACTIVE`;
+                status.style.color = "#10b981"; 
 
                 allData = rawData.map(row => ({
                     code: row["Item Code"] || "N/A",
@@ -316,17 +283,16 @@
                     dia: row["Body Dia Major"] || "-"
                 }));
 
+                // ANIMATED EMPTY STATE
                 document.getElementById('listContainer').innerHTML = `
                     <div class="empty-state">
-                        <div style="font-size: 40px; margin-bottom: 10px; opacity: 0.5;">✨</div>
-                        Ready to search
+                        <div class="empty-icon">✨</div>
+                        <div class="live-text">Ready to Search</div>
                     </div>`;
 
             } catch (error) {
-                console.error(error);
-                status.innerHTML = `Error connecting`;
+                status.innerHTML = `<span>●</span> Connection Failed`;
                 status.style.color = "#ef4444";
-                alert("Error: " + error.message);
             }
         }
 
@@ -335,7 +301,11 @@
             container.innerHTML = ""; 
 
             if (items.length === 0) {
-                container.innerHTML = `<div class='empty-state'>No items match</div>`;
+                container.innerHTML = `
+                <div class='empty-state'>
+                    <div style="font-size:30px; opacity:0.5; margin-bottom:10px">🔭</div>
+                    No matches found
+                </div>`;
                 return;
             }
 
@@ -349,12 +319,9 @@
                     copyCardData(item, icon);
                 };
 
-                // UPDATED HTML STRUCTURE FOR NEW DESIGN
                 card.innerHTML = `
                     <div class="card-header">
-                        <div class="icon-circle">
-                            <span>${icon}</span>
-                        </div>
+                        <div class="icon-circle"><span>${icon}</span></div>
                         <div class="info">
                             <div class="item-name">${item.name}</div>
                             <div class="item-code">${item.code}</div>
@@ -401,7 +368,11 @@
             const container = document.getElementById('listContainer');
 
             if (queryRaw.trim() === "") {
-                container.innerHTML = `<div class="empty-state">Ready to search...</div>`;
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">✨</div>
+                        <div class="live-text">Ready to Search</div>
+                    </div>`;
                 return; 
             }
 
@@ -416,7 +387,6 @@
         });
 
         loadInventory();
-        // --- PRESERVED LOGIC END ---
     </script>
 </body>
 </html>
