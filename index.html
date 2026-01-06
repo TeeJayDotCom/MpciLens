@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FG Inventory: ULTIMATE</title>
+    <title>FG Inventory: SECURE</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
@@ -13,243 +13,114 @@
             --glass-surface: rgba(255, 255, 255, 0.04);
             --glass-border: rgba(255, 255, 255, 0.08);
             --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --primary-accent: #c084fc; /* Bright Purple */
+            --primary-accent: #c084fc;
             --gradient-primary: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
-            --radius-xl: 24px;
         }
 
-        /* --- 1. BOUNCY SCROLL FIX --- */
-        html {
-            /* Do NOT lock height to 100%, this kills the bounce */
-            scroll-behavior: smooth;
+        /* --- 1. PASSWORD OVERLAY (GATEKEEPER) --- */
+        #passwordOverlay {
+            position: fixed; inset: 0; background: var(--bg-deep); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            backdrop-filter: blur(20px); transition: opacity 0.5s ease;
+        }
+        #passwordOverlay.hidden { opacity: 0; pointer-events: none; }
+        
+        .pass-card {
+            background: var(--glass-surface); border: 1px solid var(--glass-border);
+            padding: 40px; border-radius: 30px; text-align: center; width: 80%; max-width: 350px;
+        }
+        .pass-input {
+            width: 100%; padding: 15px; border-radius: 15px; border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.05); color: white; text-align: center;
+            font-size: 18px; outline: none; margin-top: 20px;
+        }
+        .pass-btn {
+            margin-top: 20px; width: 100%; padding: 15px; border-radius: 15px;
+            background: var(--gradient-primary); color: white; font-weight: 800; border: none;
         }
 
+        /* --- 2. BASE APP STYLING --- */
         body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: var(--text-main); 
-            margin: 0; 
-            background-color: var(--bg-deep);
-            
-            /* FORCE BOUNCE PHYSICS */
-            min-height: 101vh; /* Ensures page is always scrollable */
-            overscroll-behavior-y: contain; /* Keeps the bounce within the app */
-            -webkit-overflow-scrolling: touch;
-            
-            /* Ambient Glow Background */
-            background-image: 
-                radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 60%, rgba(236, 72, 153, 0.12) 0%, transparent 40%);
-            background-attachment: fixed;
+            font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-main); margin: 0; 
+            background-color: var(--bg-deep); min-height: 101vh; overscroll-behavior-y: contain; 
+            -webkit-overflow-scrolling: touch; background-attachment: fixed;
+            background-image: radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
         }
 
-        /* --- 2. HEADER & ANIMATED STATUS --- */
+        /* --- 3. HEADER & COUNTER --- */
         .search-container { 
-            position: sticky; 
-            top: 0; 
-            padding: 20px 24px 10px 24px; 
-            z-index: 100; 
-            background: rgba(15, 15, 19, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
+            position: sticky; top: 0; padding: 20px 24px 10px 24px; z-index: 100; 
+            background: rgba(15, 15, 19, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border);
         }
-
-        input { 
-            width: 100%; 
-            padding: 16px 20px 16px 50px; 
-            font-size: 16px; 
-            font-weight: 500;
-            border-radius: var(--radius-xl); 
-            border: 1px solid var(--glass-border); 
-            background: rgba(255, 255, 255, 0.05); 
-            color: white; 
-            outline: none;
-            box-sizing: border-box; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        input:focus { 
-            border-color: #EC4899; 
-            background: rgba(255, 255, 255, 0.08); 
-            box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.2); 
-        }
-
-        .search-icon-overlay {
-            position: absolute; left: 18px; top: 50%; transform: translateY(-50%);
-            font-size: 18px; opacity: 0.5; pointer-events: none;
-        }
-
-        /* LIVE STATUS ANIMATION */
-        #status-bar { 
-            font-size: 12px; 
-            text-align: center; 
-            margin-top: 12px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            color: #10b981; 
-            animation: pulse-green 2s infinite;
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-        }
-
-        @keyframes pulse-green {
-            0% { opacity: 0.7; text-shadow: 0 0 0 rgba(16, 185, 129, 0); }
-            50% { opacity: 1; text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
-            100% { opacity: 0.7; text-shadow: 0 0 0 rgba(16, 185, 129, 0); }
-        }
-
         .input-wrapper { position: relative; }
+        input { 
+            width: 100%; padding: 16px 20px 16px 50px; font-size: 16px; font-weight: 500;
+            border-radius: 24px; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.05); 
+            color: white; outline: none; box-sizing: border-box; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        input:focus { border-color: #EC4899; background: rgba(255, 255, 255, 0.08); }
+        .search-icon-overlay { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
 
-        /* --- 3. CARDS & LIST PADDING --- */
-        #listContainer { 
-            padding: 20px 24px;
-            /* CRITICAL: Extra padding so scroll goes way past the buttons */
-            padding-bottom: 160px; 
+        /* SEARCH COUNTER BADGE */
+        #searchCounter {
+            font-size: 10px; background: var(--gradient-primary); padding: 4px 10px;
+            border-radius: 20px; font-weight: 800; margin-top: 10px; display: inline-block;
         }
 
+        #status-bar { font-size: 12px; text-align: center; margin-top: 8px; font-weight: 700; color: #10b981; animation: pulse 2s infinite; }
+
+        /* --- 4. CARDS & SPECS --- */
+        #listContainer { padding: 20px 24px; padding-bottom: 140px; }
         .card { 
-            background: var(--glass-surface);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-xl);
-            padding: 20px; 
-            margin-bottom: 16px; 
-            cursor: pointer;
-            position: relative;
-            transition: transform 0.2s, background 0.2s;
+            background: var(--glass-surface); backdrop-filter: blur(12px); border: 1px solid var(--glass-border);
+            border-radius: 24px; padding: 20px; margin-bottom: 16px; transition: transform 0.2s;
         }
-        .card:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.08); }
-
+        .card:active { transform: scale(0.97); }
         .card-header { display: flex; align-items: center; gap: 16px; }
-        
-        .icon-circle {
-            width: 56px; height: 56px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 26px; flex-shrink: 0;
-            position: relative;
-        }
-        .icon-circle::after {
-            content: ''; position: absolute; inset: 0; border-radius: 50%;
-            background: var(--gradient-primary); opacity: 0.15;
-        }
-
-        .info { flex: 1; }
-        .item-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
-        .item-code { font-size: 12px; color: #d1d5db; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; display: inline-block; font-family: monospace; }
-
-        .qty-box { 
-            background: var(--gradient-primary); 
-            color: white; 
-            padding: 10px 14px; 
-            border-radius: 18px; 
-            text-align: center; 
-            min-width: 55px;
-            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
-        }
+        .icon-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+        .item-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+        .qty-box { background: var(--gradient-primary); padding: 10px 14px; border-radius: 18px; text-align: center; min-width: 55px; }
         .qty-val { font-size: 18px; font-weight: 800; display: block; }
-        .qty-lbl { font-size: 10px; text-transform: uppercase; font-weight: 700; opacity: 0.9; }
-
-        .expand-btn { 
-            width: 100%; background: transparent; border: none; color: #c4b5fd; margin-top: 15px; 
-            cursor: pointer; padding: 8px; font-size: 12px; font-weight: 600; 
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
         
-        /* --- 4. RESTORED BOLD SPECS FONTS --- */
+        .expand-btn { width: 100%; background: transparent; border: none; color: #c4b5fd; margin-top: 15px; cursor: pointer; font-size: 12px; font-weight: 600; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;}
         .details { display: none; margin-top: 15px; grid-template-columns: 1fr 1fr; gap: 10px; }
         .spec-pill { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; text-align: center; }
-        
-        /* Restored the look you liked: Uppercase, Colored, Bold */
-        .spec-lbl { 
-            color: var(--primary-accent); 
-            font-size: 10px; 
-            text-transform: uppercase; 
-            font-weight: 800; 
-            display: block; 
-            margin-bottom: 4px;
-            letter-spacing: 0.5px;
-        }
-        .spec-val { 
-            color: white; 
-            font-weight: 700; 
-            font-size: 15px; 
-        }
+        .spec-lbl { color: var(--primary-accent); font-size: 10px; text-transform: uppercase; font-weight: 800; display: block; margin-bottom: 4px; }
+        .spec-val { color: white; font-weight: 700; font-size: 15px; }
 
-        /* --- 5. ANIMATED EMPTY STATE --- */
-        .empty-state { 
-            text-align: center; 
-            margin-top: 60px; 
-            display: flex; flex-direction: column; align-items: center;
-        }
-        
-        .empty-icon { font-size: 48px; margin-bottom: 10px; animation: float 3s ease-in-out infinite; }
-        
-        .live-text {
-            font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(270deg, #8B5CF6, #EC4899, #8B5CF6);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradient-flow 3s ease infinite;
-        }
-
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-        @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        /* --- 6. FIXED FAB (No Overlap) --- */
-        .fab-container { 
-            position: fixed; 
-            bottom: 40px; /* Moved slightly higher */
-            right: 24px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 16px; 
-            z-index: 200; 
-        }
-        .fab { 
-            background: #1e1e24; 
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white; width: 50px; height: 50px; 
-            border-radius: 50%; font-size: 20px; cursor: pointer; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-            display: flex; align-items: center; justify-content: center; 
-            transition: transform 0.2s;
-        }
-        .fab:active { transform: scale(0.9); border-color: #EC4899; }
-        
-        #toast { 
-            visibility: hidden; min-width: 200px; background: rgba(255,255,255,0.95); color: #000; 
-            text-align: center; border-radius: 50px; padding: 14px 24px; position: fixed; 
-            z-index: 1000; left: 50%; bottom: 40px; transform: translateX(-50%) translateY(20px); 
-            font-size: 14px; font-weight: 700; box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
-            opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
-
+        /* --- 5. UI EXTRAS --- */
+        .fab-container { position: fixed; bottom: 40px; right: 24px; display: flex; flex-direction: column; gap: 16px; z-index: 200; }
+        .fab { background: #1e1e24; border: 1px solid rgba(255,255,255,0.2); color: white; width: 50px; height: 50px; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+        #toast { visibility: hidden; background: rgba(255,255,255,0.95); color: #000; border-radius: 50px; padding: 14px 24px; position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); font-weight: 700; opacity: 0; transition: 0.3s; }
+        #toast.show { visibility: visible; opacity: 1; }
+        .empty-state { text-align: center; margin-top: 60px; }
+        @keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="search-container">
-        <div class="input-wrapper">
-            <span class="search-icon-overlay">🔍</span>
-            <input type="text" id="searchInput" placeholder="Search Inventory..." autocomplete="off">
-        </div>
-        <div id="status-bar">
-            <span>●</span> Connecting...
+    <div id="passwordOverlay">
+        <div class="pass-card">
+            <h2 style="margin:0; font-weight:800;">SECURE ACCESS</h2>
+            <p style="font-size:12px; opacity:0.6;">Please enter the system password</p>
+            <input type="password" id="passInput" class="pass-input" placeholder="••••••">
+            <button class="pass-btn" onclick="checkPassword()">UNLOCK SYSTEM</button>
         </div>
     </div>
 
-    <div id="listContainer">
+    <div class="search-container">
+        <div class="input-wrapper">
+            <span class="search-icon-overlay">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search Assets..." autocomplete="off">
         </div>
+        <div style="text-align: center;">
+            <div id="searchCounter" style="display:none;">FOUND: 0 ENTRIES</div>
+            <div id="status-bar"><span>●</span> Connecting...</div>
+        </div>
+    </div>
 
-    <div id="toast">✅ Copied to clipboard!</div>
+    <div id="listContainer"></div>
+    <div id="toast">✅ Details Copied!</div>
 
     <div class="fab-container">
         <button class="fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">⬆</button>
@@ -257,149 +128,102 @@
     </div>
 
     <script>
-        const FILE_NAME = "inventory.xlsx"; 
+        const FILE_NAME = "inventory.xlsx";
+        const CORRECT_PASSWORD = "123"; // CHANGE YOUR PASSWORD HERE
         let allData = [];
 
-        function getIcon(name) {
-            const n = name.toUpperCase();
-            if (n.includes("CAP") || n.includes("SCREW") || n.includes("CLOSURE")) return "🔘"; 
-            if (n.includes("CUP") || n.includes("DOSE") || n.includes("MEASUR")) return "🥃"; 
-            if (n.includes("JAR") || n.includes("HONEY")) return "🍯"; 
-            if (n.includes("BOTTLE") || n.includes("PET")) return "🧴"; 
-            if (n.includes("PUMP") || n.includes("SPRAY") || n.includes("MIST")) return "🔫";
-            return "📦"; 
+        function checkPassword() {
+            const input = document.getElementById('passInput').value;
+            if (input === CORRECT_PASSWORD) {
+                document.getElementById('passwordOverlay').classList.add('hidden');
+                loadInventory();
+            } else {
+                alert("Incorrect Password");
+            }
         }
 
         async function loadInventory() {
             const status = document.getElementById('status-bar');
-            status.innerHTML = "<span>●</span> Syncing...";
-            status.style.color = "#fbbf24"; 
-
             try {
                 const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
-                if (!response.ok) throw new Error("File not found");
-
                 const arrayBuffer = await response.arrayBuffer();
                 const workbook = XLSX.read(arrayBuffer);
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const rawData = XLSX.utils.sheet_to_json(firstSheet);
-
+                const rawData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
                 status.innerHTML = `<span>●</span> ${rawData.length} ASSETS ACTIVE`;
-                status.style.color = "#10b981"; 
-
                 allData = rawData.map(row => ({
                     code: row["Item Code"] || "N/A",
                     name: row["Item Name"] || "Unknown Item",
                     qty: row["Quantity per Box"] || "0",
-                    weight: row["Weight"] || "-",
-                    height: row["Height"] || "-",
-                    ofc: row["OFC"] || "-",
-                    dia: row["Body Dia Major"] || "-"
+                    weight: row["Weight"] || "-", height: row["Height"] || "-", ofc: row["OFC"] || "-", dia: row["Body Dia Major"] || "-"
                 }));
+                renderEmpty();
+            } catch (error) { status.innerHTML = `<span>●</span> Sync Failed`; }
+        }
 
-                document.getElementById('listContainer').innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">✨</div>
-                        <div class="live-text">Ready to Search</div>
-                    </div>`;
-
-            } catch (error) {
-                status.innerHTML = `<span>●</span> Connection Failed`;
-                status.style.color = "#ef4444";
-            }
+        function renderEmpty() {
+            document.getElementById('listContainer').innerHTML = `<div class="empty-state">✨ Ready to Search</div>`;
+            document.getElementById('searchCounter').style.display = 'none';
         }
 
         function renderList(items) {
             const container = document.getElementById('listContainer');
+            const counterBadge = document.getElementById('searchCounter');
             container.innerHTML = ""; 
+            
+            // ENTRY COUNTER LOGIC
+            counterBadge.style.display = 'inline-block';
+            counterBadge.innerText = `FOUND: ${items.length} ENTRIES`;
 
             if (items.length === 0) {
-                container.innerHTML = `
-                <div class='empty-state'>
-                    <div style="font-size:30px; opacity:0.5; margin-bottom:10px">🔭</div>
-                    No matches found
-                </div>`;
+                container.innerHTML = `<div class='empty-state'>🔭 No matches found</div>`;
                 return;
             }
 
             items.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'card';
-                const icon = getIcon(item.name);
-                
-                card.onclick = (e) => {
-                    if(e.target.className === 'expand-btn') return;
-                    copyCardData(item, icon);
-                };
-
+                card.onclick = (e) => { if(e.target.className !== 'expand-btn') copyData(item); };
                 card.innerHTML = `
                     <div class="card-header">
-                        <div class="icon-circle"><span>${icon}</span></div>
+                        <div class="icon-circle">📦</div>
                         <div class="info">
                             <div class="item-name">${item.name}</div>
-                            <div class="item-code">${item.code}</div>
+                            <div style="font-size:12px; opacity:0.5;">${item.code}</div>
                         </div>
-                        <div class="qty-box">
-                            <span class="qty-val">${item.qty}</span>
-                            <span class="qty-lbl">Box</span>
-                        </div>
+                        <div class="qty-box"><span class="qty-val">${item.qty}</span><span style="font-size:9px;">BOX</span></div>
                     </div>
-                    
-                    <button class="expand-btn" onclick="toggleDetails('details-${index}', this)">View Specs ▾</button>
-                    
-                    <div id="details-${index}" class="details">
+                    <button class="expand-btn" onclick="toggleDetails('d-${index}', this)">VIEW SPECS ▾</button>
+                    <div id="d-${index}" class="details">
                         <div class="spec-pill"><span class="spec-lbl">Weight</span><span class="spec-val">${item.weight}</span></div>
                         <div class="spec-pill"><span class="spec-lbl">Height</span><span class="spec-val">${item.height}</span></div>
                         <div class="spec-pill"><span class="spec-lbl">OFC</span><span class="spec-val">${item.ofc}</span></div>
                         <div class="spec-pill"><span class="spec-lbl">Dia</span><span class="spec-val">${item.dia}</span></div>
-                    </div>
-                `;
+                    </div>`;
                 container.appendChild(card);
             });
         }
 
-        function copyCardData(item, icon) {
-            const text = `${icon} ${item.name}\n🆔 Code: ${item.code}\n📦 Box Qty: ${item.qty}\n\n📊 Tech Specs:\n• Weight: ${item.weight}\n• Height: ${item.height}\n• OFC: ${item.ofc}\n• Dia: ${item.dia}`;
-            navigator.clipboard.writeText(text).then(() => showToast());
+        function copyData(item) {
+            navigator.clipboard.writeText(`${item.name} (${item.code}) Qty: ${item.qty}`);
+            const t = document.getElementById("toast");
+            t.classList.add("show");
+            setTimeout(()=>t.classList.remove("show"), 2000);
         }
 
-        function showToast() {
-            var x = document.getElementById("toast");
-            x.className = "show";
-            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
-        }
-
-        window.toggleDetails = function(id, btn) {
+        window.toggleDetails = (id, btn) => {
             const el = document.getElementById(id);
             const isHidden = getComputedStyle(el).display === "none";
             el.style.display = isHidden ? "grid" : "none";
-            btn.innerHTML = isHidden ? "Hide Specs ▴" : "View Specs ▾";
+            btn.innerHTML = isHidden ? "HIDE SPECS ▴" : "VIEW SPECS ▾";
         }
 
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            const queryRaw = e.target.value;
-            const container = document.getElementById('listContainer');
-
-            if (queryRaw.trim() === "") {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">✨</div>
-                        <div class="live-text">Ready to Search</div>
-                    </div>`;
-                return; 
-            }
-
-            const query = queryRaw.toUpperCase().split(" ").filter(w => w);
-            const filtered = allData.filter(item => {
-                const n = item.name ? item.name.toString() : "";
-                const c = item.code ? item.code.toString() : "";
-                const fullText = (n + " " + c).toUpperCase();
-                return query.every(word => fullText.includes(word));
-            });
-            renderList(filtered);
+            const val = e.target.value.toUpperCase();
+            if (!val.trim()) { renderEmpty(); return; }
+            const res = allData.filter(i => (i.name + i.code).toUpperCase().includes(val));
+            renderList(res);
         });
-
-        loadInventory();
     </script>
 </body>
-</html>
+    </html>
+    
