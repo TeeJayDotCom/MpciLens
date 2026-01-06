@@ -7,167 +7,47 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <style>
-        /* --- 1. DARK MODE & LAYOUT --- */
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; 
-            background-color: #121212; 
-            color: #e0e0e0; 
-            margin: 0; 
-            padding: 16px; 
-            padding-bottom: 80px; 
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* --- 2. STICKY SEARCH BAR --- */
-        .search-container { 
-            position: sticky; 
-            top: 0; 
-            background: #121212; 
-            padding: 10px 0; 
-            z-index: 100; 
-        }
-        input { 
-            width: 100%; 
-            padding: 16px; 
-            font-size: 18px; 
-            border-radius: 12px; 
-            border: 1px solid #333; 
-            background: #1e1e1e; 
-            color: white; 
-            outline: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            box-sizing: border-box; 
-        }
-        input:focus { border-color: #2196F3; }
-
-        /* --- 3. CARD DESIGN --- */
-        .card { 
-            background: #1e1e1e; 
-            padding: 16px; 
-            margin-bottom: 12px; 
-            border-radius: 12px; 
-            border-left: 5px solid #2196F3; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            position: relative;
-            cursor: pointer;
-        }
-        .card:active { background-color: #252525; }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .info { flex: 1; padding-right: 10px; }
-        .item-name { 
-            font-size: 17px; 
-            font-weight: 700; 
-            color: #ffffff; 
-            margin-bottom: 4px; 
-            line-height: 1.3;
-        }
-        .item-code { 
-            font-size: 14px; 
-            color: #aaaaaa; 
-            background: #2c2c2c;
-            padding: 2px 6px;
-            border-radius: 4px;
-            display: inline-block;
-            font-family: monospace;
-        }
-
-        .qty-box { 
-            background: #2196F3; 
-            color: white; 
-            padding: 8px 10px; 
-            border-radius: 8px; 
-            text-align: center; 
-            min-width: 50px;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; background-color: #121212; color: #e0e0e0; margin: 0; padding: 16px; padding-bottom: 80px; }
+        .search-container { position: sticky; top: 0; background: #121212; padding: 10px 0; z-index: 100; }
+        input { width: 100%; padding: 16px; font-size: 18px; border-radius: 12px; border: 1px solid #333; background: #1e1e1e; color: white; outline: none; box-sizing: border-box; }
+        .card { background: #1e1e1e; padding: 16px; margin-bottom: 12px; border-radius: 12px; border-left: 5px solid #2196F3; cursor: pointer; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .item-name { font-size: 17px; font-weight: 700; color: #ffffff; margin-bottom: 4px; }
+        .item-code { font-size: 14px; color: #aaaaaa; background: #2c2c2c; padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+        .qty-box { background: #2196F3; color: white; padding: 8px 10px; border-radius: 8px; text-align: center; min-width: 50px; }
         .qty-val { font-size: 18px; font-weight: bold; display: block; }
-        .qty-lbl { font-size: 10px; text-transform: uppercase; opacity: 0.8; }
-
-        /* Hidden Details */
-        .details {
-            display: none;
-            margin-top: 12px;
-            padding-top: 10px;
-            border-top: 1px solid #333;
-            font-size: 13px;
-            color: #ccc;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .detail-row span { color: #888; }
+        .qty-lbl { font-size: 10px; text-transform: uppercase; }
+        .expand-btn { width: 100%; background: transparent; border: none; color: #2196F3; margin-top: 8px; cursor: pointer; text-align: left; padding: 0; }
+        .details { display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid #333; font-size: 13px; color: #ccc; grid-template-columns: 1fr 1fr; gap: 8px; }
         
-        .expand-btn {
-            width: 100%;
-            background: transparent;
-            border: none;
-            color: #2196F3;
-            font-size: 12px;
-            margin-top: 8px;
-            cursor: pointer;
-            text-align: left;
-            padding: 0;
-        }
+        /* Debug / Status Bar */
+        #status-bar { padding: 10px; background: #333; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #ccc; display: block; }
+        .error { color: #ff5252; font-weight: bold; }
+        .success { color: #4caf50; font-weight: bold; }
 
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            color: #666;
-            margin-top: 60px;
-            font-size: 16px;
-        }
-        .empty-icon { font-size: 40px; display: block; margin-bottom: 10px; opacity: 0.5; }
-
-        /* Toast Notification (Copied Message) */
-        #toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 50px;
-            padding: 16px;
-            position: fixed;
-            z-index: 1000;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            font-size: 16px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            border: 1px solid #2196F3;
-        }
+        .empty-state { text-align: center; color: #666; margin-top: 60px; font-size: 16px; }
+        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 200; }
+        .fab { background: #2196F3; color: white; width: 48px; height: 48px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+        
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #2196F3; }
         #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-
-        /* Floating Buttons */
-        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 200; }
-        .fab { 
-            background: #2196F3; color: white; width: 48px; height: 48px; 
-            border-radius: 50%; border: none; font-size: 20px; cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-        }
     </style>
 </head>
 <body>
+
+    <div id="status-bar">Connecting to GitHub...</div>
 
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="🔍 Search (e.g. Amber 100ml)...">
     </div>
 
     <div id="listContainer">
-        <div class="empty-state">
-            <span class="empty-icon">⌨️</span>
-            Start typing to search inventory...
-        </div>
+        <div class="empty-state">Loading data...</div>
     </div>
 
-    <div id="toast">📋 Copied to Clipboard!</div>
+    <div id="toast">📋 Copied!</div>
 
     <div class="fab-container">
         <button class="fab" onclick="window.scrollTo(0,0)">⬆️</button>
@@ -175,37 +55,67 @@
     </div>
 
     <script>
-        const FILE_URL = "inventory.xlsx"; 
+        // CONFIGURATION
+        const FILE_NAME = "inventory.xlsx"; 
+
         let allData = [];
 
-        // 1. LOAD FILE
+        // Helper: Normalize Headers (removes spaces, makes uppercase)
+        // This ensures "Item Name" and "ITEM NAME" both work.
+        function normalizeKey(obj, keyPart) {
+            const foundKey = Object.keys(obj).find(k => k.toUpperCase().includes(keyPart.toUpperCase()));
+            return foundKey ? obj[foundKey] : null;
+        }
+
         async function loadInventory() {
+            const status = document.getElementById('status-bar');
             try {
-                const response = await fetch(FILE_URL);
-                if (!response.ok) throw new Error("File not found");
+                status.innerHTML = "Fetching " + FILE_NAME + "...";
+                
+                // Add a timestamp to prevent caching old versions
+                const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
+                
+                if (!response.ok) {
+                    throw new Error(`File Not Found (404). Check if <b>${FILE_NAME}</b> is uploaded.`);
+                }
 
                 const arrayBuffer = await response.arrayBuffer();
                 const workbook = XLSX.read(arrayBuffer);
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const rawData = XLSX.utils.sheet_to_json(firstSheet);
                 
+                if (rawData.length === 0) {
+                    throw new Error("File found, but it is empty.");
+                }
+
+                status.innerHTML = "Processing " + rawData.length + " rows...";
+
+                // Map data using "Fuzzy Matching" for headers
                 allData = rawData.map(row => ({
-                    code: row["Item Code"] || "N/A",
-                    name: row["Item Name"] || "Unknown Item",
-                    qty: row["Quantity per Box"] || "0",
-                    weight: row["Weight"] || "-",
-                    height: row["Height"] || "-",
-                    ofc: row["OFC"] || "-",
-                    dia: row["Body Dia Major"] || "-"
+                    code: normalizeKey(row, "Code") || "N/A",
+                    name: normalizeKey(row, "Name") || "Unknown Item",
+                    qty: normalizeKey(row, "Quantity") || normalizeKey(row, "Qty") || "0",
+                    weight: normalizeKey(row, "Weight") || "-",
+                    height: normalizeKey(row, "Height") || "-",
+                    ofc: normalizeKey(row, "OFC") || "-",
+                    dia: normalizeKey(row, "Dia") || "-"
                 }));
 
+                // Success Message
+                status.innerHTML = `<span class="success">✅ Loaded ${allData.length} items. Ready to Search.</span>`;
+                
+                // Clear the loader
+                document.getElementById('listContainer').innerHTML = `
+                    <div class="empty-state">
+                        <span style="font-size:40px;">⌨️</span><br>Start typing to search...
+                    </div>`;
+
             } catch (error) {
-                document.getElementById('listContainer').innerHTML = 
-                    `<div class='empty-state' style='color:red'>⚠️ Error loading <b>inventory.xlsx</b>.<br>Check GitHub.</div>`;
+                status.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+                document.getElementById('listContainer').innerHTML = "";
             }
         }
 
-        // 2. RENDER LIST
         function renderList(items) {
             const container = document.getElementById('listContainer');
             container.innerHTML = ""; 
@@ -219,9 +129,7 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 
-                // CLICK EVENT: We pass the index to the copy function
                 card.onclick = (e) => {
-                    // Prevent copy if clicking the 'Expand' button
                     if(e.target.className === 'expand-btn') return;
                     copyCardData(item);
                 };
@@ -232,22 +140,52 @@
                             <div class="item-name">${item.name}</div>
                             <div class="item-code">${item.code}</div>
                         </div>
-                        <div class="qty-box">
-                            <span class="qty-val">${item.qty}</span>
-                            <span class="qty-lbl">Box Qty</span>
-                        </div>
+                        <div class="qty-box"><span class="qty-val">${item.qty}</span><span class="qty-lbl">Box</span></div>
                     </div>
-                    
-                    <button class="expand-btn" onclick="toggleDetails('details-${index}')">▼ View Tech Specs</button>
+                    <button class="expand-btn" onclick="toggleDetails('details-${index}')">▼ Specs</button>
                     <div id="details-${index}" class="details" style="display:none">
-                        <div class="detail-row"><span>Weight:</span> ${item.weight}</div>
-                        <div class="detail-row"><span>Height:</span> ${item.height}</div>
-                        <div class="detail-row"><span>OFC:</span> ${item.ofc}</div>
-                        <div class="detail-row"><span>Body Dia:</span> ${item.dia}</div>
+                        <div>Weight: ${item.weight}</div><div>Height: ${item.height}</div>
+                        <div>OFC: ${item.ofc}</div><div>Dia: ${item.dia}</div>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // 3. COPY FUNCTION (The New Feature)
+        function copyCardData(item) {
+            const text = `📦 ${item.name}\n🆔 Code: ${item.code}\n📦 Box Qty: ${item.qty}\n\n📊 Tech Specs:\n• Weight: ${item.weight}\n• Height: ${item.height}\n• OFC: ${item.ofc}\n• Dia: ${item.dia}`;
+            navigator.clipboard.writeText(text).then(() => showToast());
+        }
+
+        function showToast() {
+            var x = document.getElementById("toast");
+            x.className = "show";
+            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+        }
+
+        window.toggleDetails = function(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === "none") ? "grid" : "none";
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const queryRaw = e.target.value;
+            const container = document.getElementById('listContainer');
+
+            if (queryRaw.trim() === "") {
+                container.innerHTML = `<div class="empty-state">Start typing to search...</div>`;
+                return; 
+            }
+
+            const query = queryRaw.toUpperCase().split(" ").filter(w => w);
+            const filtered = allData.filter(item => {
+                const fullText = (item.name + " " + item.code).toUpperCase();
+                return query.every(word => fullText.includes(word));
+            });
+            renderList(filtered);
+        });
+
+        loadInventory();
+    </script>
+</body>
+</html>
