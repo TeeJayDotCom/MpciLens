@@ -1,362 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FG Inventory</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FG Inventory: ELECTRIC POP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --card-bg: #1a1a1e;
+            --accent: #bcfe2f; /* Cyber Lime */
+            --secondary: #8b5cf6; /* Electric Purple */
+            --text: #ffffff;
+            --border-width: 3px;
+            --bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
 
-<style>
-/* ===============================
-   PREMIUM ENTERPRISE THEME
-================================ */
+        /* --- 1. ENERGIZED BACKGROUND --- */
+        body { 
+            font-family: 'Lexend', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding-bottom: 120px;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(188, 254, 47, 0.1) 0%, transparent 40%);
+        }
 
-:root {
-  --bg: #0f1115;
-  --panel: #161922;
-  --panel-2: #1c2030;
-  --border: #2a2f45;
+        /* --- 2. VIBRANT FLOATING HEADER --- */
+        .search-container { 
+            position: sticky; 
+            top: 0; 
+            padding: 20px; 
+            z-index: 100; 
+            background: rgba(10, 10, 12, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
 
-  --text-main: #f1f3f9;
-  --text-sub: #a8aec2;
-  --text-muted: #707793;
+        .input-wrapper {
+            position: relative;
+            transform: rotate(-0.5deg);
+        }
 
-  --accent: #7f8cff;
-  --accent-soft: rgba(127,140,255,.15);
+        input { 
+            width: 100%; 
+            padding: 18px 24px; 
+            font-size: 18px; 
+            font-weight: 600;
+            border-radius: 16px; 
+            border: var(--border-width) solid var(--text); 
+            background: var(--bg); 
+            color: var(--text); 
+            outline: none;
+            box-sizing: border-box; 
+            box-shadow: 6px 6px 0px var(--accent);
+            transition: all 0.2s var(--bounce);
+        }
 
-  --radius: 14px;
-}
+        input:focus { 
+            transform: translate(-2px, -2px);
+            box-shadow: 10px 10px 0px var(--secondary);
+            border-color: var(--secondary);
+        }
 
-/* BASE */
-body {
-  margin: 0;
-  padding: 20px;
-  padding-bottom: 90px;
-  background: var(--bg);
-  color: var(--text-main);
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-}
+        /* --- 3. THE BOUNCY CARDS --- */
+        #listContainer { padding: 10px 20px; }
 
-/* STATUS */
-#status-bar {
-  background: linear-gradient(180deg, var(--panel), var(--panel-2));
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  font-size: 13px;
-  text-align: center;
-  color: var(--text-sub);
-  margin-bottom: 18px;
-}
+        .card { 
+            background: var(--card-bg); 
+            padding: 20px; 
+            margin-bottom: 24px; 
+            border-radius: 24px; 
+            border: var(--border-width) solid var(--text);
+            cursor: pointer;
+            position: relative;
+            box-shadow: 6px 6px 0px var(--text);
+            transition: all 0.3s var(--bounce);
+            animation: slideUp 0.5s var(--bounce) forwards;
+        }
 
-/* SEARCH */
-.search-container {
-  position: sticky;
-  top: 0;
-  background: var(--bg);
-  padding-bottom: 14px;
-  z-index: 10;
-}
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
-.search-container input {
-  width: 100%;
-  padding: 16px 18px;
-  font-size: 16px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--panel);
-  color: var(--text-main);
-  outline: none;
-}
+        .card:active { 
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px var(--text);
+            background: #25252b;
+        }
 
-.search-container input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
+        .card-header {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 16px;
+            align-items: center;
+        }
 
-/* EMPTY */
-.empty-state {
-  margin-top: 80px;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 15px;
-}
+        /* Pronounced Icons */
+        .icon-circle {
+            width: 55px; height: 55px;
+            background: var(--secondary);
+            border: 2px solid var(--text);
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px;
+            transform: rotate(-5deg);
+        }
 
-/* CARD */
-.card {
-  background: linear-gradient(180deg, var(--panel), var(--panel-2));
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px;
-  margin-bottom: 14px;
-  cursor: pointer;
-  transition: border-color .2s ease, transform .15s ease;
-}
+        .info-col { flex: 1; }
 
-.card:hover {
-  border-color: var(--accent);
-  transform: translateY(-1px);
-}
+        .item-name { 
+            font-size: 18px; 
+            font-weight: 800; 
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
 
-/* HEADER */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-}
+        .item-code { 
+            font-size: 13px; 
+            color: var(--accent); 
+            font-weight: 600;
+            margin-top: 4px;
+            display: inline-block;
+        }
 
-.info {
-  flex: 1;
-}
+        /* Vibrant Qty Box */
+        .qty-box { 
+            background: var(--accent); 
+            color: #000; 
+            padding: 10px 14px; 
+            border-radius: 14px; 
+            border: 2px solid #000;
+            text-align: center;
+            transform: rotate(3deg);
+        }
+        .qty-val { font-size: 20px; font-weight: 900; display: block; }
+        .qty-lbl { font-size: 9px; font-weight: 800; text-transform: uppercase; }
 
-.name-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+        /* --- 4. FUNKY TECH SPECS --- */
+        .details-pane {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            border: 2px dashed var(--secondary);
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            animation: popIn 0.3s var(--bounce);
+        }
 
-.item-icon {
-  font-size: 22px;
-  opacity: .9;
-}
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
 
-.item-name {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.35;
-}
+        .spec-unit {
+            display: flex; flex-direction: column;
+            background: #000;
+            padding: 8px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .spec-lbl { font-size: 9px; color: var(--secondary); text-transform: uppercase; font-weight: 800; }
+        .spec-val { font-size: 14px; font-weight: 600; margin-top: 2px; }
 
-.item-code {
-  margin-top: 6px;
-  font-size: 12px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  color: var(--text-muted);
-}
+        .expand-hint {
+            text-align: center; font-size: 11px; margin-top: 15px; 
+            font-weight: 800; color: var(--secondary); text-transform: uppercase;
+        }
 
-/* QTY */
-.qty-box {
-  background: var(--accent);
-  color: #fff;
-  border-radius: 10px;
-  padding: 10px 12px;
-  text-align: center;
-  min-width: 56px;
-}
+        /* --- 5. THE FAB & TOAST --- */
+        .fab-container { position: fixed; bottom: 30px; right: 20px; display: flex; flex-direction: column; gap: 15px; z-index: 200; }
+        .fab { 
+            width: 60px; height: 60px; 
+            border-radius: 20px; background: var(--text); color: var(--bg);
+            border: none; font-size: 24px; font-weight: bold;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 6px 6px 0px var(--secondary);
+            cursor: pointer;
+            transition: all 0.2s var(--bounce);
+        }
+        .fab:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px var(--secondary); }
 
-.qty-val {
-  font-size: 18px;
-  font-weight: 700;
-}
+        #toast {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
+            background: var(--accent); color: #000; padding: 20px 40px; border-radius: 20px;
+            font-weight: 900; font-size: 20px; border: 4px solid #000;
+            opacity: 0; transition: all 0.3s var(--bounce);
+            pointer-events: none; z-index: 1000;
+            box-shadow: 12px 12px 0px rgba(0,0,0,0.5);
+        }
+        #toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
-.qty-lbl {
-  font-size: 10px;
-  opacity: .85;
-  text-transform: uppercase;
-}
-
-/* DETAILS */
-.expand-btn {
-  margin-top: 12px;
-  background: none;
-  border: none;
-  padding: 0;
-  font-size: 13px;
-  color: var(--accent);
-  cursor: pointer;
-}
-
-.details {
-  display: none;
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-  font-size: 13px;
-  color: var(--text-sub);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-/* FAB */
-.fab-container {
-  position: fixed;
-  bottom: 22px;
-  right: 22px;
-  display: flex;
-  gap: 12px;
-}
-
-.fab {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  color: var(--text-main);
-  font-size: 18px;
-  cursor: pointer;
-}
-
-/* TOAST */
-#toast {
-  visibility: hidden;
-  position: fixed;
-  left: 50%;
-  bottom: 30px;
-  transform: translateX(-50%);
-  background: var(--panel);
-  border: 1px solid var(--border);
-  padding: 14px 22px;
-  border-radius: 999px;
-  font-size: 14px;
-}
-
-#toast.show {
-  visibility: visible;
-}
-</style>
+        .empty-state { text-align: center; margin-top: 80px; font-weight: 800; font-size: 22px; color: var(--secondary); }
+    </style>
 </head>
-
 <body>
 
-<div id="status-bar">Initializing…</div>
-
-<div class="search-container">
-  <input id="searchInput" placeholder="Search item name or code">
-</div>
-
-<div id="listContainer">
-  <div class="empty-state">Loading inventory…</div>
-</div>
-
-<div id="toast">Copied to clipboard</div>
-
-<div class="fab-container">
-  <button class="fab" onclick="scrollTo(0,0)">↑</button>
-  <button class="fab" onclick="scrollTo(0,document.body.scrollHeight)">↓</button>
-</div>
-
-<script>
-const FILE_NAME = "inventory.xlsx";
-let allData = [];
-
-/* ICON LOGIC — UNCHANGED */
-function getIcon(name) {
-  const n = name.toUpperCase();
-  if (n.includes("CAP") || n.includes("CLOSURE")) return "◯";
-  if (n.includes("CUP") || n.includes("DOSE")) return "▢";
-  if (n.includes("JAR")) return "⬡";
-  if (n.includes("BOTTLE") || n.includes("PET")) return "⬤";
-  if (n.includes("PUMP") || n.includes("SPRAY")) return "△";
-  return "▣";
-}
-
-async function loadInventory() {
-  const status = document.getElementById("status-bar");
-  try {
-    const res = await fetch(FILE_NAME + "?t=" + Date.now());
-    if (!res.ok) throw new Error("File not found");
-
-    const buf = await res.arrayBuffer();
-    const wb = XLSX.read(buf);
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet);
-
-    allData = rows.map(r => ({
-      code: r["Item Code"] || "-",
-      name: r["Item Name"] || "Unknown Item",
-      qty: r["Quantity per Box"] || "-",
-      weight: r["Weight"] || "-",
-      height: r["Height"] || "-",
-      ofc: r["OFC"] || "-",
-      dia: r["Body Dia Major"] || "-"
-    }));
-
-    status.textContent = `Ready • ${allData.length} items`;
-    document.getElementById("listContainer").innerHTML =
-      `<div class="empty-state">Start typing to search</div>`;
-  } catch (e) {
-    status.textContent = "Failed to load inventory";
-  }
-}
-
-function renderList(items) {
-  const c = document.getElementById("listContainer");
-  c.innerHTML = "";
-
-  if (!items.length) {
-    c.innerHTML = `<div class="empty-state">No results</div>`;
-    return;
-  }
-
-  items.forEach((it, i) => {
-    const card = document.createElement("div");
-    card.className = "card";
-    const icon = getIcon(it.name);
-
-    card.onclick = e => {
-      if (e.target.className === "expand-btn") return;
-      navigator.clipboard.writeText(
-        `${it.name}\nCode: ${it.code}\nQty/Box: ${it.qty}`
-      ).then(showToast);
-    };
-
-    card.innerHTML = `
-      <div class="card-header">
-        <div class="info">
-          <div class="name-row">
-            <span class="item-icon">${icon}</span>
-            <div class="item-name">${it.name}</div>
-          </div>
-          <div class="item-code">${it.code}</div>
+    <div class="search-container">
+        <div class="input-wrapper">
+            <input type="text" id="searchInput" placeholder="SEARCH INVENTORY..." autocomplete="off">
         </div>
-        <div class="qty-box">
-          <div class="qty-val">${it.qty}</div>
-          <div class="qty-lbl">Box</div>
+        <div id="status-bar" style="text-align:center; font-size:10px; margin-top:10px; font-weight:800; color:var(--accent);">INITIALIZING...</div>
+    </div>
+
+    <div id="listContainer">
         </div>
-      </div>
 
-      <button class="expand-btn" onclick="toggleDetails('d${i}')">
-        View technical details
-      </button>
+    <div id="toast">DETAILS COPIED! ⚡</div>
 
-      <div id="d${i}" class="details">
-        <div>Weight: ${it.weight}</div>
-        <div>Height: ${it.height}</div>
-        <div>OFC: ${it.ofc}</div>
-        <div>Diameter: ${it.dia}</div>
-      </div>
-    `;
-    c.appendChild(card);
-  });
-}
+    <div class="fab-container">
+        <button class="fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">⬆</button>
+        <button class="fab" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})">⬇</button>
+    </div>
 
-function toggleDetails(id) {
-  const el = document.getElementById(id);
-  el.style.display = el.style.display === "grid" ? "none" : "grid";
-}
+    <script>
+        const FILE_NAME = "inventory.xlsx"; 
+        let allData = [];
 
-function showToast() {
-  const t = document.getElementById("toast");
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2000);
-}
+        function getIcon(name) {
+            const n = name ? name.toUpperCase() : "";
+            if (n.includes("CAP") || n.includes("SCREW")) return "🔘"; 
+            if (n.includes("CUP") || n.includes("DOSE")) return "🥤"; 
+            if (n.includes("JAR")) return "🍯"; 
+            if (n.includes("BOTTLE") || n.includes("PET")) return "🧴"; 
+            if (n.includes("PUMP") || n.includes("SPRAY")) return "🔫";
+            return "📦"; 
+        }
 
-document.getElementById("searchInput").addEventListener("input", e => {
-  const q = e.target.value.trim().toUpperCase();
-  if (!q) {
-    document.getElementById("listContainer").innerHTML =
-      `<div class="empty-state">Start typing to search</div>`;
-    return;
-  }
-  const words = q.split(" ");
-  renderList(allData.filter(i =>
-    words.every(w => (i.name + i.code).toUpperCase().includes(w))
-  ));
-});
+        async function loadInventory() {
+            const status = document.getElementById('status-bar');
+            try {
+                const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
+                if (!response.ok) throw new Error("FILE NOT FOUND");
+                
+                const buffer = await response.arrayBuffer();
+                const workbook = XLSX.read(buffer);
+                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                
+                const getVal = (r,k) => {
+                    const found = Object.keys(r).find(key => key.toUpperCase().includes(k.toUpperCase()));
+                    return found ? r[found] : null;
+                };
 
-loadInventory();
-</script>
+                allData = json.map(r => ({
+                    code: getVal(r,"Code")||"N/A", name: getVal(r,"Name")||"UNKNOWN",
+                    qty: getVal(r,"Qty")||getVal(r,"Quantity")||"0",
+                    weight: getVal(r,"Weight")||"-", height: getVal(r,"Height")||"-",
+                    ofc: getVal(r,"OFC")||"-", dia: getVal(r,"Dia")||"-"
+                }));
+
+                status.innerText = `${allData.length} ITEMS SYNCED`;
+                renderEmpty();
+            } catch (err) {
+                status.innerText = "SYSTEM ERROR: " + err.message;
+            }
+        }
+
+        function renderEmpty() {
+            document.getElementById('listContainer').innerHTML = `
+                <div class="empty-state">
+                    READY FOR INPUT... 🚀
+                </div>`;
+        }
+
+        function renderList(items) {
+            const container = document.getElementById('listContainer');
+            container.innerHTML = "";
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="empty-state">NO MATCHES FOUND! 🛑</div>`;
+                return;
+            }
+
+            items.forEach((item, idx) => {
+                const icon = getIcon(item.name);
+                const el = document.createElement('div');
+                el.className = 'card';
+                el.style.animationDelay = `${idx * 0.05}s`;
+                
+                el.onclick = (e) => {
+                    if(e.target.closest('.details-pane')) return;
+                    const pane = document.getElementById(`d-${idx}`);
+                    const isHidden = getComputedStyle(pane).display === "none";
+                    pane.style.display = isHidden ? "grid" : "none";
+                    if(isHidden) copyData(item);
+                };
+                
+                el.innerHTML = `
+                    <div class="card-header">
+                        <div class="icon-circle">${icon}</div>
+                        <div class="info-col">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-code">ID: ${item.code}</div>
+                        </div>
+                        <div class="qty-box">
+                            <div class="qty-val">${item.qty}</div>
+                            <div class="qty-lbl">PCS</div>
+                        </div>
+                    </div>
+
+                    <div id="d-${idx}" class="details-pane">
+                        <div class="spec-unit"><span class="spec-lbl">Weight</span><span class="spec-val">${item.weight}</span></div>
+                        <div class="spec-unit"><span class="spec-lbl">Height</span><span class="spec-val">${item.height}</span></div>
+                        <div class="spec-unit"><span class="spec-lbl">OFC</span><span class="spec-val">${item.ofc}</span></div>
+                        <div class="spec-unit"><span class="spec-lbl">Dia</span><span class="spec-val">${item.dia}</span></div>
+                    </div>
+                    
+                    <div class="expand-hint">TAP TO SEE SPECS ⚡</div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        function copyData(item) {
+            const txt = `${item.name} (${item.code}) Qty: ${item.qty}`;
+            navigator.clipboard.writeText(txt);
+            const t = document.getElementById('toast');
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const val = e.target.value.toUpperCase().trim();
+            if (!val) { renderEmpty(); return; }
+            
+            const terms = val.split(" ").filter(Boolean);
+            const res = allData.filter(i => {
+                const str = (i.name + " " + i.code).toUpperCase();
+                return terms.every(t => str.includes(t));
+            });
+            renderList(res);
+        });
+
+        loadInventory();
+    </script>
 </body>
 </html>
