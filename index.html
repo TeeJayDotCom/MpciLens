@@ -12,6 +12,7 @@
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
             min-height: 100vh;
             padding: 20px;
             padding-bottom: 100px;
@@ -23,7 +24,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .header {
             text-align: center;
             margin-bottom: 30px;
@@ -41,10 +41,10 @@
             text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
-        /* Status Bar */
         #status-bar { 
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             padding: 16px 20px;
             border-radius: 16px;
             margin-bottom: 20px;
@@ -52,11 +52,9 @@
             color: white;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             font-weight: 600;
         }
 
-        /* Search Bar */
         .search-container { 
             position: sticky; 
             top: 20px; 
@@ -83,38 +81,32 @@
             font-size: 16px;
             border-radius: 16px;
             border: none;
-            background: rgba(255, 255, 255, 0.95);
+            background: white;
             color: #333;
             outline: none;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-            transition: box-shadow 0.2s ease;
             font-weight: 500;
         }
 
         input:focus { 
             box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-            background: white;
         }
 
         input::placeholder {
             color: #999;
         }
 
-        /* Product Cards */
         #listContainer {
             display: grid;
             gap: 16px;
         }
 
         .card { 
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: white;
             padding: 20px;
             border-radius: 20px;
             cursor: pointer;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
             position: relative;
             overflow: hidden;
         }
@@ -129,13 +121,8 @@
             background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
         }
 
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-        }
-
         .card:active { 
-            transform: translateY(-2px);
+            transform: scale(0.98);
         }
 
         .card-header {
@@ -172,17 +159,15 @@
         .item-code { 
             font-size: 13px;
             color: #718096;
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            background: #f7fafc;
             padding: 4px 10px;
             border-radius: 8px;
             font-family: 'Courier New', monospace;
             margin-left: 50px;
             display: inline-block;
             font-weight: 600;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         
-        /* Quantity Box */
         .qty-box { 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -209,10 +194,9 @@
             letter-spacing: 0.5px;
         }
         
-        /* Expand Button */
         .expand-btn { 
             width: 100%;
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            background: #f7fafc;
             border: none;
             color: #667eea;
             margin-top: 12px;
@@ -222,19 +206,17 @@
             border-radius: 10px;
             font-weight: 700;
             font-size: 13px;
-            transition: background 0.2s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        .expand-btn:hover {
-            background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+        .expand-btn:active {
+            background: #edf2f7;
         }
 
         .details { 
             display: none;
             margin-top: 16px;
             padding: 16px;
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            background: #f7fafc;
             border-radius: 12px;
             font-size: 13px;
             color: #4a5568;
@@ -249,7 +231,6 @@
             font-weight: 600;
         }
         
-        /* Empty State */
         .empty-state { 
             text-align: center;
             color: white;
@@ -263,7 +244,6 @@
             margin-bottom: 16px;
         }
         
-        /* FAB Buttons */
         .fab-container { 
             position: fixed;
             bottom: 24px;
@@ -287,18 +267,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s ease;
-        }
-
-        .fab:hover {
-            transform: scale(1.1);
         }
 
         .fab:active {
-            transform: scale(0.95);
+            transform: scale(0.9);
         }
         
-        /* Toast */
         #toast { 
             visibility: hidden;
             min-width: 250px;
@@ -315,7 +289,6 @@
             font-size: 16px;
             font-weight: 600;
             box-shadow: 0 4px 16px rgba(102, 126, 234, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         #toast.show { 
@@ -333,9 +306,27 @@
             to { bottom: 0; opacity: 0; }
         }
 
-        /* Responsive */
+        /* Scroll bounce effect */
+        @keyframes bounceTop {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes bounceBottom {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+
+        .bounce-top {
+            animation: bounceTop 0.5s ease-out;
+        }
+
+        .bounce-bottom {
+            animation: bounceBottom 0.5s ease-out;
+        }
+
         @media (max-width: 600px) {
-            body { padding: 16px; }
+            body { padding: 16px; padding-bottom: 100px; }
             h1 { font-size: 26px; }
             .card { padding: 16px; }
             .details { grid-template-columns: 1fr; }
@@ -343,7 +334,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="mainContainer">
         <div class="header">
             <div class="logo">📦</div>
             <h1>FG Inventory Pro</h1>
@@ -369,13 +360,14 @@
     <div id="toast">📋 Copied to clipboard!</div>
 
     <div class="fab-container">
-        <button class="fab" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="Scroll to top">⬆️</button>
-        <button class="fab" onclick="window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'})" title="Scroll to bottom">⬇️</button>
+        <button class="fab" id="scrollTop" title="Scroll to top">⬆️</button>
+        <button class="fab" id="scrollBottom" title="Scroll to bottom">⬇️</button>
     </div>
 
     <script>
         const FILE_NAME = "inventory.xlsx"; 
         let allData = [];
+        let lastScrollTop = 0;
 
         function getIcon(name) {
             const n = name.toUpperCase();
@@ -403,8 +395,6 @@
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const rawData = XLSX.utils.sheet_to_json(firstSheet);
 
-                status.innerHTML = "⚙️ Processing " + rawData.length + " rows...";
-
                 allData = rawData.map(row => ({
                     code: row["Item Code"] || "N/A",
                     name: row["Item Name"] || "Unknown Item",
@@ -426,7 +416,7 @@
             } catch (error) {
                 console.error(error);
                 status.innerHTML = `❌ Error: ${error.message}`;
-                alert("Error: " + error.message + "\n\nMake sure 'inventory.xlsx' exists in the same folder.");
+                alert("Error: " + error.message + "\n\nMake sure 'inventory.xlsx' exists.");
             }
         }
 
@@ -438,72 +428,72 @@
                 return;
             }
 
-            // Use DocumentFragment for better performance
-            const fragment = document.createDocumentFragment();
-
+            let html = '';
             items.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                
                 const icon = getIcon(item.name);
-                
-                card.onclick = (e) => {
-                    if(e.target.className === 'expand-btn') return;
-                    copyCardData(item, icon);
-                };
-
-                card.innerHTML = `
-                    <div class="card-header">
-                        <div class="info">
-                            <div class="name-row">
-                                <span class="item-icon">${icon}</span>
-                                <div class="item-name">${item.name}</div>
+                html += `
+                    <div class="card" onclick="copyCard(${index})">
+                        <div class="card-header">
+                            <div class="info">
+                                <div class="name-row">
+                                    <span class="item-icon">${icon}</span>
+                                    <div class="item-name">${item.name}</div>
+                                </div>
+                                <div class="item-code">${item.code}</div>
                             </div>
-                            <div class="item-code">${item.code}</div>
+                            <div class="qty-box">
+                                <span class="qty-val">${item.qty}</span>
+                                <span class="qty-lbl">per box</span>
+                            </div>
                         </div>
-                        <div class="qty-box">
-                            <span class="qty-val">${item.qty}</span>
-                            <span class="qty-lbl">per box</span>
+                        
+                        <button class="expand-btn" onclick="event.stopPropagation(); toggleDetails('det-${index}')">▼ View Technical Specs</button>
+                        <div id="det-${index}" class="details">
+                            <div>⚖️ Weight: ${item.weight}</div>
+                            <div>📏 Height: ${item.height}</div>
+                            <div>🔧 OFC: ${item.ofc}</div>
+                            <div>⭕ Diameter: ${item.dia}</div>
                         </div>
-                    </div>
-                    
-                    <button class="expand-btn" onclick="toggleDetails('details-${index}')">▼ View Technical Specs</button>
-                    <div id="details-${index}" class="details">
-                        <div>⚖️ Weight: ${item.weight}</div>
-                        <div>📏 Height: ${item.height}</div>
-                        <div>🔧 OFC: ${item.ofc}</div>
-                        <div>⭕ Diameter: ${item.dia}</div>
                     </div>
                 `;
-                fragment.appendChild(card);
             });
 
-            // Clear and append all at once for better performance
-            container.innerHTML = "";
-            container.appendChild(fragment);
+            container.innerHTML = html;
         }
 
-        function copyCardData(item, icon) {
+        function copyCard(index) {
+            const filtered = getCurrentFilteredItems();
+            const item = filtered[index];
+            const icon = getIcon(item.name);
             const text = `${icon} ${item.name}\n🆔 Code: ${item.code}\n📦 Box Qty: ${item.qty}\n\n📊 Technical Specifications:\n• Weight: ${item.weight}\n• Height: ${item.height}\n• OFC: ${item.ofc}\n• Diameter: ${item.dia}`;
-            navigator.clipboard.writeText(text).then(() => showToast());
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById("toast");
+                toast.className = "show";
+                setTimeout(() => { toast.className = ""; }, 3000);
+            });
         }
 
-        function showToast() {
-            const toast = document.getElementById("toast");
-            toast.className = "show";
-            setTimeout(() => { toast.className = ""; }, 3000);
+        function getCurrentFilteredItems() {
+            const query = document.getElementById('searchInput').value.toUpperCase().split(" ").filter(w => w);
+            if (query.length === 0) return allData;
+            return allData.filter(item => {
+                const fullText = ((item.name || "") + " " + (item.code || "")).toUpperCase();
+                return query.every(word => fullText.includes(word));
+            });
         }
 
         window.toggleDetails = function(id) {
             const el = document.getElementById(id);
-            el.style.display = (el.style.display === "none" || !el.style.display) ? "grid" : "none";
+            if (el.style.display === "grid") {
+                el.style.display = "none";
+            } else {
+                el.style.display = "grid";
+            }
         }
 
-        // Optimized search with debouncing
-        let searchTimeout;
+        // Instant search - no debouncing
         document.getElementById('searchInput').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            
             const queryRaw = e.target.value;
             const container = document.getElementById('listContainer');
 
@@ -512,15 +502,51 @@
                 return; 
             }
 
-            // Debounce for better performance
-            searchTimeout = setTimeout(() => {
-                const query = queryRaw.toUpperCase().split(" ").filter(w => w);
-                const filtered = allData.filter(item => {
-                    const fullText = ((item.name || "") + " " + (item.code || "")).toUpperCase();
-                    return query.every(word => fullText.includes(word));
-                });
-                renderList(filtered);
-            }, 150);
+            const query = queryRaw.toUpperCase().split(" ").filter(w => w);
+            const filtered = allData.filter(item => {
+                const fullText = ((item.name || "") + " " + (item.code || "")).toUpperCase();
+                return query.every(word => fullText.includes(word));
+            });
+            renderList(filtered);
+        });
+
+        // Scroll bounce effect
+        let isAtTop = false;
+        let isAtBottom = false;
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight;
+
+            // Check if at top
+            if (scrollTop === 0 && !isAtTop) {
+                isAtTop = true;
+                document.getElementById('mainContainer').classList.add('bounce-top');
+                setTimeout(() => {
+                    document.getElementById('mainContainer').classList.remove('bounce-top');
+                    isAtTop = false;
+                }, 500);
+            }
+
+            // Check if at bottom
+            if (scrollTop + clientHeight >= scrollHeight - 5 && !isAtBottom) {
+                isAtBottom = true;
+                document.getElementById('mainContainer').classList.add('bounce-bottom');
+                setTimeout(() => {
+                    document.getElementById('mainContainer').classList.remove('bounce-bottom');
+                    isAtBottom = false;
+                }, 500);
+            }
+        });
+
+        // Scroll buttons with bounce
+        document.getElementById('scrollTop').addEventListener('click', () => {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+
+        document.getElementById('scrollBottom').addEventListener('click', () => {
+            window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
         });
 
         loadInventory();
