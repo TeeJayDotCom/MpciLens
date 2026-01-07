@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Pro</title>
+    <title>FG Inventory Pro</title>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <style>
@@ -53,6 +53,22 @@
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.2);
             font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #status-bar .status-text {
+            flex: 1;
+        }
+
+        #status-bar .count-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-left: 12px;
         }
 
         .search-container { 
@@ -340,7 +356,9 @@
             <h1>FG Inventory Pro</h1>
         </div>
 
-        <div id="status-bar">⚡ Initializing...</div>
+        <div id="status-bar">
+            <span class="status-text">⚡ Initializing...</span>
+        </div>
 
         <div class="search-container">
             <div class="search-wrapper">
@@ -381,7 +399,7 @@
 
         async function loadInventory() {
             const status = document.getElementById('status-bar');
-            status.innerHTML = "⏳ Loading " + FILE_NAME + "...";
+            status.innerHTML = "<span class='status-text'>⏳ Loading " + FILE_NAME + "...</span>";
 
             try {
                 const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
@@ -405,7 +423,7 @@
                     dia: row["Body Dia Major"] || "-"
                 }));
 
-                status.innerHTML = `✅ Ready! Loaded ${allData.length} items`;
+                updateStatusBar(allData.length, allData.length);
                 
                 document.getElementById('listContainer').innerHTML = `
                     <div class="empty-state">
@@ -415,8 +433,17 @@
 
             } catch (error) {
                 console.error(error);
-                status.innerHTML = `❌ Error: ${error.message}`;
+                status.innerHTML = "<span class='status-text'>❌ Error: " + error.message + "</span>";
                 alert("Error: " + error.message + "\n\nMake sure 'inventory.xlsx' exists.");
+            }
+        }
+
+        function updateStatusBar(showing, total) {
+            const status = document.getElementById('status-bar');
+            if (showing === total) {
+                status.innerHTML = `<span class='status-text'>✅ Ready!</span><span class='count-badge'>${total} items</span>`;
+            } else {
+                status.innerHTML = `<span class='status-text'>🔍 Search Results</span><span class='count-badge'>${showing} of ${total}</span>`;
             }
         }
 
@@ -425,8 +452,12 @@
             
             if (items.length === 0) {
                 container.innerHTML = `<div class='empty-state'><span>🔍</span>No items found</div>`;
+                updateStatusBar(0, allData.length);
                 return;
             }
+
+            // Update count
+            updateStatusBar(items.length, allData.length);
 
             let html = '';
             items.forEach((item, index) => {
@@ -499,6 +530,7 @@
 
             if (queryRaw.trim() === "") {
                 container.innerHTML = `<div class="empty-state"><span>⌨️</span>Start typing to search inventory...</div>`;
+                updateStatusBar(allData.length, allData.length);
                 return; 
             }
 
