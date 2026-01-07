@@ -173,15 +173,17 @@
         }
         
         .item-code { 
-            font-size: 13px;
-            color: #718096;
-            background: #f7fafc;
-            padding: 4px 10px;
+            font-size: 14px; /* Increased font size */
+            color: #1a202c; /* Darker color for better readability */
+            background: #edf2f7; /* Slightly darker background for contrast */
+            padding: 6px 12px; /* Increased padding */
             border-radius: 8px;
             font-family: 'Courier New', monospace;
             margin-left: 50px;
             display: inline-block;
-            font-weight: 600;
+            font-weight: 700; /* Made bolder */
+            letter-spacing: 0.5px; /* Added spacing for clarity */
+            border: 1px solid #e2e8f0; /* Subtle border for definition */
         }
         
         .qty-box { 
@@ -391,7 +393,7 @@
             const n = name.toUpperCase();
             if (n.includes("CAP") || n.includes("SCREW") || n.includes("CLOSURE")) return "🔘"; 
             if (n.includes("CUP") || n.includes("DOSE") || n.includes("MEASUR")) return "🥃"; 
-            if (n.includes("JAR")) return "🍯"; 
+            if (n.includes("JAR") || n.includes("HONEY")) return "🍯"; 
             if (n.includes("BOTTLE") || n.includes("PET")) return "🧴"; 
             if (n.includes("PUMP") || n.includes("SPRAY") || n.includes("MIST")) return "🔫";
             return "📦"; 
