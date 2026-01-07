@@ -7,156 +7,485 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <style>
-        /* --- 1. APP STYLING (Dark Mode) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; 
-            background-color: #121212; 
-            color: #e0e0e0; 
-            margin: 0; 
-            padding: 16px; 
-            padding-bottom: 80px; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 100px;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* --- 2. SEARCH BAR --- */
+        /* Animated Background Circles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+        }
+
+        h1 {
+            color: white;
+            font-size: 32px;
+            font-weight: 800;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+            letter-spacing: -0.5px;
+        }
+
+        /* Status Bar - Glassmorphic */
+        #status-bar { 
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: white;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.8s ease;
+            font-weight: 600;
+        }
+
+        /* Search Bar - Enhanced */
         .search-container { 
             position: sticky; 
-            top: 0; 
-            background: #121212; 
-            padding: 10px 0; 
-            z-index: 100; 
+            top: 20px; 
+            margin-bottom: 24px;
+            z-index: 100;
+            animation: fadeIn 1s ease;
         }
-        input { 
-            width: 100%; 
-            padding: 16px; 
-            font-size: 18px; 
-            border-radius: 12px; 
-            border: 1px solid #333; 
-            background: #1e1e1e; 
-            color: white; 
-            outline: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            box-sizing: border-box; 
-        }
-        input:focus { border-color: #2196F3; }
 
-        /* --- 3. PRODUCT CARDS --- */
-        .card { 
-            background: #1e1e1e; 
-            padding: 16px; 
-            margin-bottom: 12px; 
-            border-radius: 12px; 
-            border-left: 5px solid #2196F3; 
-            cursor: pointer; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        .search-wrapper {
             position: relative;
         }
-        .card:active { background-color: #252525; }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        input { 
+            width: 100%;
+            padding: 18px 20px 18px 56px;
+            font-size: 16px;
+            border-radius: 16px;
+            border: none;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            color: #333;
+            outline: none;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        input:focus { 
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            background: white;
+        }
+
+        input::placeholder {
+            color: #999;
+        }
+
+        /* Product Cards - Stunning Design */
+        #listContainer {
+            display: grid;
+            gap: 16px;
+        }
+
+        .card { 
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: cardSlideIn 0.5s ease backwards;
+        }
+
+        @keyframes cardSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+        }
+
+        .card:hover::before {
+            width: 100%;
+            opacity: 0.05;
+        }
+
+        .card:active { 
+            transform: translateY(-2px);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+        }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            gap: 16px;
         }
         
-        /* Layout: Icon + Name */
-        .info { flex: 1; padding-right: 10px; }
-        .name-row { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-        .item-icon { font-size: 28px; } /* Large Icon */
-        .item-name { font-size: 17px; font-weight: 700; color: #ffffff; line-height: 1.3; }
+        .info { 
+            flex: 1; 
+            min-width: 0;
+        }
+
+        .name-row { 
+            display: flex; 
+            align-items: center; 
+            gap: 14px; 
+            margin-bottom: 8px;
+        }
+
+        .item-icon { 
+            font-size: 36px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            animation: iconPop 0.5s ease backwards;
+        }
+
+        @keyframes iconPop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .item-name { 
+            font-size: 17px; 
+            font-weight: 700;
+            color: #2d3748;
+            line-height: 1.4;
+            word-break: break-word;
+        }
         
         .item-code { 
-            font-size: 14px; 
-            color: #aaaaaa; 
-            background: #2c2c2c; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            font-family: monospace; 
-            margin-left: 44px; /* Aligned with text */
-            display: inline-block; 
+            font-size: 13px;
+            color: #718096;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin-left: 50px;
+            display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         
-        /* Quantity Box */
+        /* Quantity Box - Vibrant */
         .qty-box { 
-            background: #2196F3; 
-            color: white; 
-            padding: 8px 10px; 
-            border-radius: 8px; 
-            text-align: center; 
-            min-width: 50px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 14px;
+            text-align: center;
+            min-width: 65px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            flex-shrink: 0;
         }
-        .qty-val { font-size: 18px; font-weight: bold; display: block; }
-        .qty-lbl { font-size: 10px; text-transform: uppercase; }
+
+        .qty-val { 
+            font-size: 22px;
+            font-weight: 800;
+            display: block;
+            line-height: 1;
+        }
+
+        .qty-lbl { 
+            font-size: 10px;
+            text-transform: uppercase;
+            opacity: 0.9;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
         
-        /* Expand Button & Details */
-        .expand-btn { width: 100%; background: transparent; border: none; color: #2196F3; margin-top: 8px; cursor: pointer; text-align: left; padding: 0; margin-left: 44px; }
-        .details { display: none; margin-top: 12px; padding-top: 10px; border-top: 1px solid #333; font-size: 13px; color: #ccc; grid-template-columns: 1fr 1fr; gap: 8px; margin-left: 44px; }
+        /* Expand Button */
+        .expand-btn { 
+            width: 100%;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border: none;
+            color: #667eea;
+            margin-top: 12px;
+            cursor: pointer;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .expand-btn:hover {
+            background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .expand-btn:active {
+            transform: translateY(0);
+        }
+
+        .details { 
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 12px;
+            font-size: 13px;
+            color: #4a5568;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .details > div {
+            padding: 8px;
+            background: white;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
         
-        /* --- 4. UTILS (Status, Toast, Buttons) --- */
-        #status-bar { padding: 10px; background: #333; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #ccc; display: block; text-align: center; border: 1px solid #555; }
-        .empty-state { text-align: center; color: #666; margin-top: 60px; font-size: 16px; }
+        /* Empty State */
+        .empty-state { 
+            text-align: center;
+            color: white;
+            margin-top: 60px;
+            font-size: 18px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .empty-state span {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
         
-        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 200; }
-        .fab { background: #2196F3; color: white; width: 48px; height: 48px; border-radius: 50%; border: none; font-size: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+        /* FAB Buttons - Vibrant */
+        .fab-container { 
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 200;
+        }
+
+        .fab { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease backwards;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 28px rgba(102, 126, 234, 0.6);
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+        }
         
-        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 50px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #2196F3; }
-        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        /* Toast - Stylish */
+        #toast { 
+            visibility: hidden;
+            min-width: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            border-radius: 50px;
+            padding: 16px 24px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        #toast.show { 
+            visibility: visible;
+            animation: toastIn 0.5s, toastOut 0.5s 2.5s;
+        }
+
+        @keyframes toastIn { 
+            from { bottom: 0; opacity: 0; transform: translateX(-50%) scale(0.8); }
+            to { bottom: 30px; opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+
+        @keyframes toastOut { 
+            from { bottom: 30px; opacity: 1; transform: translateX(-50%) scale(1); }
+            to { bottom: 0; opacity: 0; transform: translateX(-50%) scale(0.8); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            body { padding: 16px; }
+            .container { padding: 0; }
+            h1 { font-size: 26px; }
+            .card { padding: 16px; }
+            .details { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📦</div>
+            <h1>FG Inventory Pro</h1>
+        </div>
 
-    <div id="status-bar">Initializing...</div>
+        <div id="status-bar">⚡ Initializing...</div>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="🔍 Search (e.g. Amber 100ml)...">
+        <div class="search-container">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search items (e.g. Amber 100ml)...">
+            </div>
+        </div>
+
+        <div id="listContainer">
+            <div class="empty-state">
+                <span>📂</span>
+                Loading inventory...
+            </div>
+        </div>
     </div>
 
-    <div id="listContainer">
-        <div class="empty-state">Loading inventory...</div>
-    </div>
-
-    <div id="toast">📋 Copied!</div>
+    <div id="toast">📋 Copied to clipboard!</div>
 
     <div class="fab-container">
-        <button class="fab" onclick="window.scrollTo(0,0)">⬆️</button>
-        <button class="fab" onclick="window.scrollTo(0, document.body.scrollHeight)">⬇️</button>
+        <button class="fab" onclick="window.scrollTo({top:0, behavior:'smooth'})" title="Scroll to top">⬆️</button>
+        <button class="fab" onclick="window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'})" title="Scroll to bottom">⬇️</button>
     </div>
 
     <script>
         const FILE_NAME = "inventory.xlsx"; 
         let allData = [];
 
-        // --- 1. SMART ICON SELECTOR (UPDATED) ---
         function getIcon(name) {
             const n = name.toUpperCase();
-            
-            // CAPS (Plastic Closures) -> Radio Button (Looks like a round cap)
             if (n.includes("CAP") || n.includes("SCREW") || n.includes("CLOSURE")) return "🔘"; 
-            
-            // CUPS (Dose/Measuring) -> Tumbler Glass (Looks like a small dose cup)
             if (n.includes("CUP") || n.includes("DOSE") || n.includes("MEASUR")) return "🥃"; 
-            
-            // JARS (PET) -> Honey Pot (Best representation of a wide mouth container)
             if (n.includes("JAR")) return "🍯"; 
-            
-            // BOTTLES (PET) -> Lotion Bottle (Standard Plastic Bottle)
             if (n.includes("BOTTLE") || n.includes("PET")) return "🧴"; 
-            
-            // PUMPS/SPRAYS -> Water Pistol (Spray)
             if (n.includes("PUMP") || n.includes("SPRAY") || n.includes("MIST")) return "🔫";
-
-            // Default -> Box
             return "📦"; 
         }
 
         async function loadInventory() {
             const status = document.getElementById('status-bar');
-            status.innerHTML = "Loading " + FILE_NAME + "...";
+            status.innerHTML = "⏳ Loading " + FILE_NAME + "...";
 
             try {
-                // Fetch file with timestamp to prevent caching
                 const response = await fetch(FILE_NAME + "?t=" + new Date().getTime());
                 
                 if (!response.ok) {
@@ -168,9 +497,8 @@
                 const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                 const rawData = XLSX.utils.sheet_to_json(firstSheet);
 
-                status.innerHTML = "Processing " + rawData.length + " rows...";
+                status.innerHTML = "⚙️ Processing " + rawData.length + " rows...";
 
-                // Map Columns
                 allData = rawData.map(row => ({
                     code: row["Item Code"] || "N/A",
                     name: row["Item Name"] || "Unknown Item",
@@ -181,20 +509,18 @@
                     dia: row["Body Dia Major"] || "-"
                 }));
 
-                status.innerHTML = `✅ Ready. Loaded ${allData.length} items.`;
-                status.style.color = "#4caf50";
+                status.innerHTML = `✅ Ready! Loaded ${allData.length} items`;
                 
-                // Set Clean Start Screen
                 document.getElementById('listContainer').innerHTML = `
                     <div class="empty-state">
-                        <span style="font-size:40px;">⌨️</span><br>Start typing to search...
+                        <span>⌨️</span>
+                        Start typing to search inventory...
                     </div>`;
 
             } catch (error) {
                 console.error(error);
                 status.innerHTML = `❌ Error: ${error.message}`;
-                status.style.color = "#ff5252";
-                alert("Error: " + error.message + "\n\nMake sure your file on GitHub is named 'inventory.xlsx' (all lowercase).");
+                alert("Error: " + error.message + "\n\nMake sure 'inventory.xlsx' exists in the same folder.");
             }
         }
 
@@ -203,18 +529,17 @@
             container.innerHTML = ""; 
 
             if (items.length === 0) {
-                container.innerHTML = `<div class='empty-state'>No items match.</div>`;
+                container.innerHTML = `<div class='empty-state'><span>🔍</span>No items found</div>`;
                 return;
             }
 
             items.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = 'card';
+                card.style.animationDelay = `${index * 0.05}s`;
                 
-                // Get the Icon based on name
                 const icon = getIcon(item.name);
                 
-                // Click to Copy Logic
                 card.onclick = (e) => {
                     if(e.target.className === 'expand-btn') return;
                     copyCardData(item, icon);
@@ -224,21 +549,23 @@
                     <div class="card-header">
                         <div class="info">
                             <div class="name-row">
-                                <span class="item-icon">${icon}</span>
+                                <span class="item-icon" style="animation-delay: ${index * 0.05 + 0.1}s">${icon}</span>
                                 <div class="item-name">${item.name}</div>
                             </div>
                             <div class="item-code">${item.code}</div>
                         </div>
                         <div class="qty-box">
                             <span class="qty-val">${item.qty}</span>
-                            <span class="qty-lbl">Box</span>
+                            <span class="qty-lbl">per box</span>
                         </div>
                     </div>
                     
-                    <button class="expand-btn" onclick="toggleDetails('details-${index}')">▼ View Tech Specs</button>
-                    <div id="details-${index}" class="details" style="display:none">
-                        <div>Weight: ${item.weight}</div><div>Height: ${item.height}</div>
-                        <div>OFC: ${item.ofc}</div><div>Dia: ${item.dia}</div>
+                    <button class="expand-btn" onclick="toggleDetails('details-${index}')">▼ View Technical Specs</button>
+                    <div id="details-${index}" class="details">
+                        <div>⚖️ Weight: ${item.weight}</div>
+                        <div>📏 Height: ${item.height}</div>
+                        <div>🔧 OFC: ${item.ofc}</div>
+                        <div>⭕ Diameter: ${item.dia}</div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -246,36 +573,33 @@
         }
 
         function copyCardData(item, icon) {
-            const text = `${icon} ${item.name}\n🆔 Code: ${item.code}\n📦 Box Qty: ${item.qty}\n\n📊 Tech Specs:\n• Weight: ${item.weight}\n• Height: ${item.height}\n• OFC: ${item.ofc}\n• Dia: ${item.dia}`;
+            const text = `${icon} ${item.name}\n🆔 Code: ${item.code}\n📦 Box Qty: ${item.qty}\n\n📊 Technical Specifications:\n• Weight: ${item.weight}\n• Height: ${item.height}\n• OFC: ${item.ofc}\n• Diameter: ${item.dia}`;
             navigator.clipboard.writeText(text).then(() => showToast());
         }
 
         function showToast() {
-            var x = document.getElementById("toast");
-            x.className = "show";
-            setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+            const toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(() => { toast.className = ""; }, 3000);
         }
 
         window.toggleDetails = function(id) {
             const el = document.getElementById(id);
-            el.style.display = (el.style.display === "none") ? "grid" : "none";
+            el.style.display = (el.style.display === "none" || !el.style.display) ? "grid" : "none";
         }
 
-        // Search Logic
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const queryRaw = e.target.value;
             const container = document.getElementById('listContainer');
 
             if (queryRaw.trim() === "") {
-                container.innerHTML = `<div class="empty-state">Start typing to search...</div>`;
+                container.innerHTML = `<div class="empty-state"><span>⌨️</span>Start typing to search inventory...</div>`;
                 return; 
             }
 
             const query = queryRaw.toUpperCase().split(" ").filter(w => w);
             const filtered = allData.filter(item => {
-                const n = item.name ? item.name.toString() : "";
-                const c = item.code ? item.code.toString() : "";
-                const fullText = (n + " " + c).toUpperCase();
+                const fullText = ((item.name || "") + " " + (item.code || "")).toUpperCase();
                 return query.every(word => fullText.includes(word));
             });
             renderList(filtered);
