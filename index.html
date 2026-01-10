@@ -485,7 +485,7 @@
                             <div>⚖️ Weight: ${item.weight}</div>
                             <div>📏 Height: ${item.height}</div>
                             <div>🔧 OFC: ${item.ofc}</div>
-                            <div>⭕ Diameter: ${item.dia}</div>
+                            <div>⭕ Body Dia.: ${item.dia}</div>
                         </div>
                     </div>
                 `;
@@ -498,7 +498,7 @@
             const filtered = getCurrentFilteredItems();
             const item = filtered[index];
             const icon = getIcon(item.name);
-            const text = `${icon} ${item.name}\n🆔 Code: ${item.code}\n📦 Box Qty: ${item.qty}\n\n📊 Technical Specifications:\n• Weight: ${item.weight}\n• Height: ${item.height}\n• OFC: ${item.ofc}\n• Diameter: ${item.dia}`;
+            const text = `${icon} ${item.name}\n🆔 Code: ${item.code}\n📦 Box Qty: ${item.qty}\n\n📊 Technical Specifications:\n• Weight: ${item.weight}\n• Height: ${item.height}\n• OFC: ${item.ofc}\n• Body Dia.: ${item.dia}`;
             
             navigator.clipboard.writeText(text).then(() => {
                 const toast = document.getElementById("toast");
